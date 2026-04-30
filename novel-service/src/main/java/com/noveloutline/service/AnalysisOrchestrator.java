@@ -18,6 +18,7 @@ public class AnalysisOrchestrator {
 
     @Async
     public void startAnalysis(Long novelId) {
+        log.info("Async analysis started: novelId={}", novelId);
         try {
             engine.analyzeNovel(novelId);
         } catch (Exception e) {

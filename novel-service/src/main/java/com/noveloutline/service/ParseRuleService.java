@@ -2,12 +2,16 @@ package com.noveloutline.service;
 
 import com.noveloutline.common.entity.ParseRule;
 import com.noveloutline.common.mapper.ParseRuleMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class ParseRuleService {
+
+    private static final Logger log = LoggerFactory.getLogger(ParseRuleService.class);
 
     private final ParseRuleMapper mapper;
 
@@ -29,6 +33,7 @@ public class ParseRuleService {
 
     public ParseRule create(ParseRule rule) {
         mapper.insert(rule);
+        log.info("ParseRule created: id={}, name={}", rule.getId(), rule.getName());
         return rule;
     }
 
@@ -39,6 +44,7 @@ public class ParseRuleService {
         existing.setChapterRegex(updated.getChapterRegex());
         existing.setEnabled(updated.getEnabled());
         mapper.update(existing);
+        log.info("ParseRule updated: id={}, name={}", existing.getId(), existing.getName());
         return existing;
     }
 }

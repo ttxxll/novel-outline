@@ -64,15 +64,21 @@ public class NovelAnalysisEngine {
             throw new IllegalArgumentException("Novel not found: " + novelId);
         }
 
+        log.info("Starting analysis: novelId={}, title={}", novelId, novel.getTitle());
+
         novel.setStatus("ANALYZING");
         novelMapper.update(novel);
 
         try {
             NovelContext context = contextManager.createInitial();
             List<Volume> volumes = volumeMapper.findByNovelId(novelId);
+            log.info("Analyzing {} volumes", volumes.size());
             List<VolumeAnalysisResult> volumeResults = new ArrayList<>();
 
-            for (Volume volume : volumes) {
+            for (int vi = 0; vi < volumes.size(); vi++) {
+                Volume volume = volumes.get(vi);
+                log.info("=== Volume {}/{}: '{}' ===", vi + 1, volumes.size(), volume.getTitle());
+
                 VolumeAnalysisResult volResult = analyzeVolume(volume, context);
                 volumeResults.add(volResult);
 
@@ -82,6 +88,7 @@ public class NovelAnalysisEngine {
                 contextManager.pruneAfterVolume(context, volResult.volumeSummary);
             }
 
+            log.info("Building final outline...");
             OutlineResult outline = outlineBuilder.build(novel.getTitle(), volumeResults);
 
             NovelOutline outlineEntity = outlineMapper.findByNovelId(novelId);
@@ -97,6 +104,7 @@ public class NovelAnalysisEngine {
 
             novel.setStatus("COMPLETED");
             novelMapper.update(novel);
+            log.info("Analysis completed successfully: novelId={}, title={}", novelId, novel.getTitle());
 
         } catch (Exception e) {
             log.error("Analysis failed for novel {}", novelId, e);
@@ -108,10 +116,13 @@ public class NovelAnalysisEngine {
 
     private VolumeAnalysisResult analyzeVolume(Volume volume, NovelContext context) throws Exception {
         List<Chapter> chapters = chapterMapper.findByVolumeId(volume.getId());
+        log.info("Volume '{}': {} chapters to analyze", volume.getTitle(), chapters.size());
         List<String> chapterResultJsons = new ArrayList<>();
 
-        for (Chapter chapter : chapters) {
+        for (int ci = 0; ci < chapters.size(); ci++) {
+            Chapter chapter = chapters.get(ci);
             if ("COMPLETED".equals(chapter.getStatus()) && chapter.getAnalysisResult() != null) {
+                log.debug("Chapter {}/{} '{}' already analyzed, restoring context", ci + 1, chapters.size(), chapter.getTitle());
                 try {
                     ChapterAnalysisResult existing = objectMapper.readValue(
                             chapter.getAnalysisResult(), ChapterAnalysisResult.class);
@@ -123,6 +134,7 @@ public class NovelAnalysisEngine {
                 continue;
             }
 
+            log.info("=== Chapter {}/{}: '{}' ({} words) ===", ci + 1, chapters.size(), chapter.getTitle(), chapter.getWordCount());
             ChapterAnalysisResult result = analyzeChapterWithRetry(chapter, context);
             String resultJson = objectMapper.writeValueAsString(result);
 
@@ -150,13 +162,15 @@ public class NovelAnalysisEngine {
                 return chapterAnalyzer.analyze(chapter.getTitle(), chapter.getRawContent(), context);
             } catch (Exception e) {
                 lastException = e;
-                log.warn("Chapter {} attempt {} failed: {}", chapter.getId(), attempt + 1, e.getMessage());
+                log.warn("Chapter {} '{}' attempt {}/{} failed: {}", chapter.getId(), chapter.getTitle(), attempt + 1, MAX_RETRIES, e.getMessage());
                 if (attempt < MAX_RETRIES - 1) {
                     long delay = (long) Math.pow(2, attempt) * 2000;
+                    log.info("Retrying chapter {} in {}ms...", chapter.getId(), delay);
                     Thread.sleep(delay);
                 }
             }
         }
+        log.error("Chapter {} '{}' failed after {} attempts", chapter.getId(), chapter.getTitle(), MAX_RETRIES);
         chapter.setStatus("FAILED");
         chapterMapper.update(chapter);
         throw lastException;

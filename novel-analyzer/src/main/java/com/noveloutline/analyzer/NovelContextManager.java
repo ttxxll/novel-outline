@@ -2,6 +2,8 @@ package com.noveloutline.analyzer;
 
 import com.noveloutline.common.dto.ChapterAnalysisResult;
 import com.noveloutline.common.dto.NovelContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -10,7 +12,10 @@ import java.util.stream.Collectors;
 @Component
 public class NovelContextManager {
 
+    private static final Logger log = LoggerFactory.getLogger(NovelContextManager.class);
+
     public NovelContext createInitial() {
+        log.debug("Creating initial novel context");
         return new NovelContext();
     }
 
@@ -21,7 +26,10 @@ public class NovelContextManager {
             result.characters.stream()
                     .filter(c -> "主角".equals(c.role))
                     .findFirst()
-                    .ifPresent(c -> context.protagonist = c.name);
+                    .ifPresent(c -> {
+                        context.protagonist = c.name;
+                        log.info("Protagonist identified: {}", c.name);
+                    });
         }
 
         if (result.characters != null) {
@@ -59,9 +67,19 @@ public class NovelContextManager {
         }
 
         context.totalChaptersAnalyzed++;
+        log.debug("Context updated after chapter {}: characters={}, factions={}, foreshadowing={}, conflicts={}",
+                chapterIndex,
+                context.characters.size(),
+                context.activeFactions.size(),
+                context.unresolvedForeshadowing.size(),
+                context.activeConflicts.size());
     }
 
     public void pruneAfterVolume(NovelContext context, String volumeSummary) {
+        int beforeChars = context.characters.size();
+        int beforeForeshadowing = context.unresolvedForeshadowing.size();
+        int beforeConflicts = context.activeConflicts.size();
+
         if (context.unresolvedForeshadowing.size() > 10) {
             context.unresolvedForeshadowing = new ArrayList<>(
                     context.unresolvedForeshadowing.subList(
@@ -81,5 +99,10 @@ public class NovelContextManager {
                 .collect(Collectors.toList());
 
         context.recentSummary = volumeSummary;
+
+        log.info("Context pruned: characters {}→{}, foreshadowing {}→{}, conflicts {}→{}",
+                beforeChars, context.characters.size(),
+                beforeForeshadowing, context.unresolvedForeshadowing.size(),
+                beforeConflicts, context.activeConflicts.size());
     }
 }

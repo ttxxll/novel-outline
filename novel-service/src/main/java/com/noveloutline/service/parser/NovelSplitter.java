@@ -32,6 +32,7 @@ public class NovelSplitter {
 
     public SplitResult split(Path filePath, ParseRule rule) throws IOException {
         String content = readWithDetectedEncoding(filePath);
+        log.info("File content length: {} chars", content.length());
 
         SplitResult result = new SplitResult();
 
@@ -39,11 +40,19 @@ public class NovelSplitter {
         String chapterRegex = rule.getChapterRegex();
 
         if (volumeRegex != null && !volumeRegex.trim().isEmpty()) {
+            log.info("Splitting with volumes: volumeRegex={}, chapterRegex={}", volumeRegex, chapterRegex);
             splitWithVolumes(content, volumeRegex, chapterRegex, result);
         } else {
+            log.info("Splitting chapters only: chapterRegex={}", chapterRegex);
             splitChaptersOnly(content, chapterRegex, result);
         }
 
+        log.info("Split result: {} volumes, {} chapters", result.volumeTitles.size(), result.segments.size());
+        for (int i = 0; i < result.segments.size(); i++) {
+            ChapterSegment seg = result.segments.get(i);
+            log.debug("  [{}/{}] {} > {} ({} chars)",
+                    i + 1, result.segments.size(), seg.volumeTitle, seg.title, seg.content.length());
+        }
         return result;
     }
 

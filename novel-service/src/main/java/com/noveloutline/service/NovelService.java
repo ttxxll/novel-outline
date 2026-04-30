@@ -11,6 +11,8 @@ import com.noveloutline.common.mapper.NovelMapper;
 import com.noveloutline.common.mapper.NovelOutlineMapper;
 import com.noveloutline.common.mapper.VolumeMapper;
 import com.noveloutline.service.parser.NovelSplitter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class NovelService {
+
+    private static final Logger log = LoggerFactory.getLogger(NovelService.class);
 
     private final NovelMapper novelMapper;
     private final VolumeMapper volumeMapper;
@@ -45,6 +49,8 @@ public class NovelService {
     @Transactional
     public Novel uploadAndParse(MultipartFile file, Long parseRuleId) throws IOException {
         ParseRule rule = parseRuleService.getById(parseRuleId);
+        log.info("Parsing novel with rule: id={}, name={}, volumeRegex={}, chapterRegex={}",
+                rule.getId(), rule.getName(), rule.getVolumeRegex(), rule.getChapterRegex());
 
         Path tmpPath = Files.createTempFile("novel_", ".txt");
         file.transferTo(tmpPath.toFile());
@@ -53,6 +59,8 @@ public class NovelService {
         NovelSplitter.SplitResult splitResult = splitter.split(tmpPath, rule);
 
         Files.deleteIfExists(tmpPath);
+
+        log.info("Split result: {} volumes, {} chapters", splitResult.volumeTitles.size(), splitResult.segments.size());
 
         Novel novel = new Novel();
         novel.setTitle(extractTitle(file.getOriginalFilename()));
@@ -69,6 +77,7 @@ public class NovelService {
                 vol.setIndex(volumeTitleToId.size());
                 vol.setTitle(vt);
                 volumeMapper.insert(vol);
+                log.debug("Created volume: id={}, title={}, index={}", vol.getId(), vol.getTitle(), vol.getIndex());
                 return vol.getId();
             });
 
@@ -90,8 +99,11 @@ public class NovelService {
             for (int i = 0; i < chapters.size(); i++) {
                 chapterMapper.updateIndex(chapters.get(i).getId(), i);
             }
+            log.debug("Volume '{}': {} chapters indexed", vol.getTitle(), chapters.size());
         }
 
+        log.info("Novel parsed successfully: novelId={}, volumes={}, chapters={}",
+                novel.getId(), volumes.size(), splitResult.segments.size());
         return novel;
     }
 
@@ -129,6 +141,7 @@ public class NovelService {
 
     @Transactional
     public void delete(Long id) {
+        log.info("Deleting novel and related data: novelId={}", id);
         outlineMapper.deleteByNovelId(id);
         chapterMapper.deleteByNovelId(id);
         volumeMapper.deleteByNovelId(id);
