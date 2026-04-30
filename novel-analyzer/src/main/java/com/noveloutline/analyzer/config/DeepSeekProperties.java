@@ -11,7 +11,8 @@ public class DeepSeekProperties {
 
     private String apiKey;
     private String baseUrl = "https://api.deepseek.com";
-    private String model = "deepseek-chat";
+    private String chatPath = "/v1/chat/completions";
+    private String model = "deepseek-v4-pro";
     private int maxTokens = 8192;
     private double temperature = 0.3;
 }

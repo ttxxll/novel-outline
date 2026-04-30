@@ -56,7 +56,7 @@ public class DeepSeekClient {
 
         long startTime = System.currentTimeMillis();
         ResponseEntity<String> responseEntity = restTemplate.exchange(
-                properties.getBaseUrl() + "/v1/chat/completions",
+                properties.getBaseUrl() + properties.getChatPath(),
                 HttpMethod.POST,
                 entity,
                 String.class);

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /d D:\\\\Project\\\\IDEA_Projects\\\\novel-outline)",
+      "Bash(mvn compile *)"
+    ]
+  }
+}

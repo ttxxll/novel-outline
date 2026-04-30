@@ -1,63 +1,67 @@
 package com.noveloutline.analyzer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.noveloutline.common.dto.ChapterAnalysisResult;
 import com.noveloutline.common.dto.NovelContext;
 import com.noveloutline.common.dto.OutlineResult;
 import com.noveloutline.common.dto.VolumeAnalysisResult;
-import com.noveloutline.common.entity.Chapter;
 import com.noveloutline.common.entity.Novel;
 import com.noveloutline.common.entity.NovelOutline;
 import com.noveloutline.common.entity.Volume;
-import com.noveloutline.common.mapper.ChapterMapper;
+import com.noveloutline.common.enums.NovelStatus;
 import com.noveloutline.common.mapper.NovelMapper;
 import com.noveloutline.common.mapper.NovelOutlineMapper;
 import com.noveloutline.common.mapper.VolumeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class NovelAnalysisEngine {
 
     private static final Logger log = LoggerFactory.getLogger(NovelAnalysisEngine.class);
-    private static final int MAX_RETRIES = 3;
 
-    private final ChapterAnalyzer chapterAnalyzer;
-    private final VolumeAggregator volumeAggregator;
+    private final VolumeAnalysisHandler volumeHandler;
     private final OutlineBuilder outlineBuilder;
     private final NovelContextManager contextManager;
-    private final ChapterMapper chapterMapper;
-    private final VolumeMapper volumeMapper;
     private final NovelMapper novelMapper;
+    private final VolumeMapper volumeMapper;
     private final NovelOutlineMapper outlineMapper;
     private final ObjectMapper objectMapper;
+    private final ThreadPoolExecutor analysisExecutor;
 
-    public NovelAnalysisEngine(ChapterAnalyzer chapterAnalyzer,
-                               VolumeAggregator volumeAggregator,
+    public NovelAnalysisEngine(VolumeAnalysisHandler volumeHandler,
                                OutlineBuilder outlineBuilder,
                                NovelContextManager contextManager,
-                               ChapterMapper chapterMapper,
-                               VolumeMapper volumeMapper,
                                NovelMapper novelMapper,
+                               VolumeMapper volumeMapper,
                                NovelOutlineMapper outlineMapper,
                                ObjectMapper objectMapper) {
-        this.chapterAnalyzer = chapterAnalyzer;
-        this.volumeAggregator = volumeAggregator;
+        this.volumeHandler = volumeHandler;
         this.outlineBuilder = outlineBuilder;
         this.contextManager = contextManager;
-        this.chapterMapper = chapterMapper;
-        this.volumeMapper = volumeMapper;
         this.novelMapper = novelMapper;
+        this.volumeMapper = volumeMapper;
         this.outlineMapper = outlineMapper;
         this.objectMapper = objectMapper;
+
+        this.analysisExecutor = new ThreadPoolExecutor(
+                5, 10,
+                60, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                r -> { Thread t = new Thread(r, "novel-analysis"); t.setDaemon(true); return t; },
+                new ThreadPoolExecutor.CallerRunsPolicy());
+        this.analysisExecutor.allowCoreThreadTimeOut(true);
     }
 
-    @Transactional
+    /**
+     * Validate, set status to ANALYZING, then submit actual work to the thread pool.
+     */
     public void analyzeNovel(Long novelId) {
         Novel novel = novelMapper.findById(novelId);
         if (novel == null) {
@@ -65,10 +69,13 @@ public class NovelAnalysisEngine {
         }
 
         log.info("Starting analysis: novelId={}, title={}", novelId, novel.getTitle());
-
-        novel.setStatus("ANALYZING");
+        novel.setStatus(NovelStatus.ANALYZING);
         novelMapper.update(novel);
 
+        analysisExecutor.submit(() -> doAnalyzeNovel(novelId));
+    }
+
+    private void doAnalyzeNovel(Long novelId) {
         try {
             NovelContext context = contextManager.createInitial();
             List<Volume> volumes = volumeMapper.findByNovelId(novelId);
@@ -79,16 +86,27 @@ public class NovelAnalysisEngine {
                 Volume volume = volumes.get(vi);
                 log.info("=== Volume {}/{}: '{}' ===", vi + 1, volumes.size(), volume.getTitle());
 
-                VolumeAnalysisResult volResult = analyzeVolume(volume, context);
+                VolumeAnalysisResult volResult = volumeHandler.analyze(volume, context);
+                if (volResult == null) {
+                    log.error("Analysis aborted at volume '{}' due to chapter failure", volume.getTitle());
+                    markNovelFailed(novelId);
+                    return;
+                }
                 volumeResults.add(volResult);
-
-                volume.setSummary(objectMapper.writeValueAsString(volResult));
-                volumeMapper.update(volume);
-
                 contextManager.pruneAfterVolume(context, volResult.volumeSummary);
             }
 
-            log.info("Building final outline...");
+            buildAndSaveOutline(novelId, volumeResults);
+        } catch (Exception e) {
+            log.error("Analysis failed for novel {}", novelId, e);
+            markNovelFailed(novelId);
+        }
+    }
+
+    private void buildAndSaveOutline(Long novelId, List<VolumeAnalysisResult> volumeResults) {
+        Novel novel = novelMapper.findById(novelId);
+        log.info("Building final outline...");
+        try {
             OutlineResult outline = outlineBuilder.build(novel.getTitle(), volumeResults);
 
             NovelOutline outlineEntity = outlineMapper.findByNovelId(novelId);
@@ -102,77 +120,20 @@ public class NovelAnalysisEngine {
                 outlineMapper.updateByNovelId(novelId, outlineJson);
             }
 
-            novel.setStatus("COMPLETED");
+            novel.setStatus(NovelStatus.COMPLETED);
             novelMapper.update(novel);
             log.info("Analysis completed successfully: novelId={}, title={}", novelId, novel.getTitle());
-
         } catch (Exception e) {
-            log.error("Analysis failed for novel {}", novelId, e);
-            novel.setStatus("FAILED");
+            log.error("Failed to build outline for novel {}", novelId, e);
+            markNovelFailed(novelId);
+        }
+    }
+
+    private void markNovelFailed(Long novelId) {
+        Novel novel = novelMapper.findById(novelId);
+        if (novel != null) {
+            novel.setStatus(NovelStatus.FAILED);
             novelMapper.update(novel);
-            throw new RuntimeException("Analysis failed", e);
         }
-    }
-
-    private VolumeAnalysisResult analyzeVolume(Volume volume, NovelContext context) throws Exception {
-        List<Chapter> chapters = chapterMapper.findByVolumeId(volume.getId());
-        log.info("Volume '{}': {} chapters to analyze", volume.getTitle(), chapters.size());
-        List<String> chapterResultJsons = new ArrayList<>();
-
-        for (int ci = 0; ci < chapters.size(); ci++) {
-            Chapter chapter = chapters.get(ci);
-            if ("COMPLETED".equals(chapter.getStatus()) && chapter.getAnalysisResult() != null) {
-                log.debug("Chapter {}/{} '{}' already analyzed, restoring context", ci + 1, chapters.size(), chapter.getTitle());
-                try {
-                    ChapterAnalysisResult existing = objectMapper.readValue(
-                            chapter.getAnalysisResult(), ChapterAnalysisResult.class);
-                    contextManager.applyChapterResult(context, existing, chapter.getIndex());
-                    chapterResultJsons.add(chapter.getAnalysisResult());
-                } catch (Exception e) {
-                    log.warn("Failed to restore context from chapter {}", chapter.getId());
-                }
-                continue;
-            }
-
-            log.info("=== Chapter {}/{}: '{}' ({} words) ===", ci + 1, chapters.size(), chapter.getTitle(), chapter.getWordCount());
-            ChapterAnalysisResult result = analyzeChapterWithRetry(chapter, context);
-            String resultJson = objectMapper.writeValueAsString(result);
-
-            chapter.setAnalysisResult(resultJson);
-            chapter.setStatus("COMPLETED");
-            chapterMapper.update(chapter);
-
-            Novel novel = novelMapper.findById(volume.getNovelId());
-            if (novel != null) {
-                novel.setLastAnalyzedChapterId(chapter.getId());
-                novelMapper.update(novel);
-            }
-
-            contextManager.applyChapterResult(context, result, chapter.getIndex());
-            chapterResultJsons.add(resultJson);
-        }
-
-        return volumeAggregator.aggregate(volume.getTitle(), chapterResultJsons);
-    }
-
-    private ChapterAnalysisResult analyzeChapterWithRetry(Chapter chapter, NovelContext context) throws Exception {
-        Exception lastException = null;
-        for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
-            try {
-                return chapterAnalyzer.analyze(chapter.getTitle(), chapter.getRawContent(), context);
-            } catch (Exception e) {
-                lastException = e;
-                log.warn("Chapter {} '{}' attempt {}/{} failed: {}", chapter.getId(), chapter.getTitle(), attempt + 1, MAX_RETRIES, e.getMessage());
-                if (attempt < MAX_RETRIES - 1) {
-                    long delay = (long) Math.pow(2, attempt) * 2000;
-                    log.info("Retrying chapter {} in {}ms...", chapter.getId(), delay);
-                    Thread.sleep(delay);
-                }
-            }
-        }
-        log.error("Chapter {} '{}' failed after {} attempts", chapter.getId(), chapter.getTitle(), MAX_RETRIES);
-        chapter.setStatus("FAILED");
-        chapterMapper.update(chapter);
-        throw lastException;
     }
 }

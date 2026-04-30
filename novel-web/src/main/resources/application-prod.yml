@@ -1,0 +1,27 @@
+# ===============================
+#  生产环境
+# ===============================
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+deepseek:
+  api-key: ${DEEPSEEK_API_KEY:}
+  base-url: https://api.deepseek.com
+  model: deepseek-v4-pro
+  max-tokens: 8192
+  temperature: 0.3

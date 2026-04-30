@@ -1,6 +1,7 @@
 package com.noveloutline.common.mapper;
 
 import com.noveloutline.common.entity.Chapter;
+import com.noveloutline.common.enums.ChapterStatus;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -18,24 +19,24 @@ public interface ChapterMapper {
     List<Chapter> findByVolumeId(Long volumeId);
 
     @Select("SELECT * FROM chapter WHERE novel_id = #{novelId} AND status = #{status} ORDER BY idx ASC")
-    List<Chapter> findByNovelIdAndStatus(@Param("novelId") Long novelId, @Param("status") String status);
+    List<Chapter> findByNovelIdAndStatus(@Param("novelId") Long novelId, @Param("status") ChapterStatus status);
 
     @Select("SELECT COUNT(*) FROM chapter WHERE novel_id = #{novelId}")
     long countByNovelId(Long novelId);
 
     @Select("SELECT COUNT(*) FROM chapter WHERE novel_id = #{novelId} AND status = #{status}")
-    long countByNovelIdAndStatus(@Param("novelId") Long novelId, @Param("status") String status);
+    long countByNovelIdAndStatus(@Param("novelId") Long novelId, @Param("status") ChapterStatus status);
 
     @Insert("INSERT INTO chapter (volume_id, novel_id, idx, title, raw_content, analysis_result, status, word_count) " +
-            "VALUES (#{volumeId}, #{novelId}, #{index}, #{title}, #{rawContent}, #{analysisResult}, #{status}, #{wordCount})")
+            "VALUES (#{volumeId}, #{novelId}, #{idx}, #{title}, #{rawContent}, #{analysisResult}, #{status}, #{wordCount})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Chapter chapter);
 
     @Update("UPDATE chapter SET analysis_result = #{analysisResult}, status = #{status}, title = #{title} WHERE id = #{id}")
     int update(Chapter chapter);
 
-    @Update("UPDATE chapter SET idx = #{index} WHERE id = #{id}")
-    int updateIndex(@Param("id") Long id, @Param("index") Integer index);
+    @Update("UPDATE chapter SET idx = #{idx} WHERE id = #{id}")
+    int updateIndex(@Param("id") Long id, @Param("idx") Integer idx);
 
     @Delete("DELETE FROM chapter WHERE novel_id = #{novelId}")
     int deleteByNovelId(Long novelId);

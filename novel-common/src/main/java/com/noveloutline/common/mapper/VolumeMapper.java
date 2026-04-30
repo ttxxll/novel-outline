@@ -14,7 +14,7 @@ public interface VolumeMapper {
     @Select("SELECT * FROM volume WHERE novel_id = #{novelId} ORDER BY idx ASC")
     List<Volume> findByNovelId(Long novelId);
 
-    @Insert("INSERT INTO volume (novel_id, idx, title, summary) VALUES (#{novelId}, #{index}, #{title}, #{summary})")
+    @Insert("INSERT INTO volume (novel_id, idx, title, summary) VALUES (#{novelId}, #{idx}, #{title}, #{summary})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Volume volume);
 

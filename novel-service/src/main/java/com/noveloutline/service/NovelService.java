@@ -6,6 +6,8 @@ import com.noveloutline.common.entity.Chapter;
 import com.noveloutline.common.entity.Novel;
 import com.noveloutline.common.entity.ParseRule;
 import com.noveloutline.common.entity.Volume;
+import com.noveloutline.common.enums.ChapterStatus;
+import com.noveloutline.common.enums.NovelStatus;
 import com.noveloutline.common.mapper.ChapterMapper;
 import com.noveloutline.common.mapper.NovelMapper;
 import com.noveloutline.common.mapper.NovelOutlineMapper;
@@ -65,7 +67,7 @@ public class NovelService {
         Novel novel = new Novel();
         novel.setTitle(extractTitle(file.getOriginalFilename()));
         novel.setOriginalFilename(file.getOriginalFilename());
-        novel.setStatus("NOT_STARTED");
+        novel.setStatus(NovelStatus.NOT_STARTED);
         novelMapper.insert(novel);
 
         Map<String, Long> volumeTitleToId = new LinkedHashMap<>();
@@ -74,20 +76,20 @@ public class NovelService {
             Long volumeId = volumeTitleToId.computeIfAbsent(seg.volumeTitle, vt -> {
                 Volume vol = new Volume();
                 vol.setNovelId(novel.getId());
-                vol.setIndex(volumeTitleToId.size());
+                vol.setIdx(volumeTitleToId.size());
                 vol.setTitle(vt);
                 volumeMapper.insert(vol);
-                log.debug("Created volume: id={}, title={}, index={}", vol.getId(), vol.getTitle(), vol.getIndex());
+                log.debug("Created volume: id={}, title={}, idx={}", vol.getId(), vol.getTitle(), vol.getIdx());
                 return vol.getId();
             });
 
             Chapter chapter = new Chapter();
             chapter.setNovelId(novel.getId());
             chapter.setVolumeId(volumeId);
-            chapter.setIndex(0);
+            chapter.setIdx(0);
             chapter.setTitle(seg.title);
             chapter.setRawContent(seg.content);
-            chapter.setStatus("PENDING");
+            chapter.setStatus(ChapterStatus.PENDING);
             chapter.setWordCount(seg.content.length());
             chapterMapper.insert(chapter);
         }
@@ -115,7 +117,7 @@ public class NovelService {
                     item.title = n.getTitle();
                     item.status = n.getStatus();
                     item.totalChapters = (int) chapterMapper.countByNovelId(n.getId());
-                    item.analyzedChapters = (int) chapterMapper.countByNovelIdAndStatus(n.getId(), "COMPLETED");
+                    item.analyzedChapters = (int) chapterMapper.countByNovelIdAndStatus(n.getId(), ChapterStatus.COMPLETED);
                     item.createdAt = n.getCreatedAt();
                     return item;
                 })
@@ -135,7 +137,7 @@ public class NovelService {
         NovelProgress progress = new NovelProgress();
         progress.status = novel.getStatus();
         progress.totalChapters = (int) chapterMapper.countByNovelId(id);
-        progress.chaptersDone = (int) chapterMapper.countByNovelIdAndStatus(id, "COMPLETED");
+        progress.chaptersDone = (int) chapterMapper.countByNovelIdAndStatus(id, ChapterStatus.COMPLETED);
         return progress;
     }
 

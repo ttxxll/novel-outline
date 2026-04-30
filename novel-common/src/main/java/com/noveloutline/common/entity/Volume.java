@@ -7,7 +7,7 @@ public class Volume {
 
     private Long id;
     private Long novelId;
-    private Integer index;
+    private Integer idx;
     private String title;
     private String summary;
 }
