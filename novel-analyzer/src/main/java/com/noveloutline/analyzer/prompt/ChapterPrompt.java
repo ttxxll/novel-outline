@@ -27,6 +27,7 @@ public final class ChapterPrompt {
             "   - techniques: [{name, grade, significance}]\n" +
             "   - elixirs: [{name, grade, significance}]\n" +
             "   - spiritBeasts: [{name, level, significance}]\n" +
+            "   - spiritHerbs: [{name, grade, significance}]\n" +
             "5. locations: 本章出现的地点 [{name, type: 城市/城镇/村落/山/其他, events}]\n" +
             "6. conflicts: 本章发生的冲突 [{type: 战斗/口角/权谋/竞争, parties, cause, result}]\n" +
             "7. foreshadowing: 本章埋伏的伏笔 [{description, hint, likelihood: 高/中/低}]\n\n" +

@@ -1,16 +1,18 @@
 package com.noveloutline.common.dto;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class VolumeAnalysisResult {
-
     public String volumeSummary;
     public List<String> keyEvents;
-    public List<ChapterAnalysisResult.CharacterEntry> charactersIntroduced;
-    public List<ChapterAnalysisResult.FactionEntry> factionsIntroduced;
-    public ChapterAnalysisResult.Items itemsAcquired;
-    public List<ChapterAnalysisResult.LocationEntry> locationsVisited;
-    public List<ChapterAnalysisResult.ConflictEntry> majorConflicts;
-    public List<ChapterAnalysisResult.ForeshadowingEntry> foreshadowingPlanted;
-    public List<ChapterAnalysisResult.ForeshadowingEntry> foreshadowingResolved;
+    public List<CharacterEntry> charactersIntroduced;
+    public List<FactionEntry> factionsIntroduced;
+    public Items itemsAcquired;
+    public List<LocationEntry> locationsVisited;
+    public List<ConflictEntry> majorConflicts;
+    public List<ForeshadowingEntry> foreshadowingPlanted;
+    public List<ForeshadowingEntry> foreshadowingResolved;
 }

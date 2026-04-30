@@ -1,5 +1,6 @@
 package com.noveloutline.service;
 
+import com.noveloutline.analyzer.NovelRecordManager;
 import com.noveloutline.common.dto.NovelListItem;
 import com.noveloutline.common.dto.NovelProgress;
 import com.noveloutline.common.entity.Chapter;
@@ -35,17 +36,20 @@ public class NovelService {
     private final ChapterMapper chapterMapper;
     private final NovelOutlineMapper outlineMapper;
     private final ParseRuleService parseRuleService;
+    private final NovelRecordManager recordManager;
 
     public NovelService(NovelMapper novelMapper,
                         VolumeMapper volumeMapper,
                         ChapterMapper chapterMapper,
                         NovelOutlineMapper outlineMapper,
-                        ParseRuleService parseRuleService) {
+                        ParseRuleService parseRuleService,
+                        NovelRecordManager recordManager) {
         this.novelMapper = novelMapper;
         this.volumeMapper = volumeMapper;
         this.chapterMapper = chapterMapper;
         this.outlineMapper = outlineMapper;
         this.parseRuleService = parseRuleService;
+        this.recordManager = recordManager;
     }
 
     @Transactional
@@ -145,6 +149,7 @@ public class NovelService {
     public void delete(Long id) {
         log.info("Deleting novel and related data: novelId={}", id);
         outlineMapper.deleteByNovelId(id);
+        recordManager.deleteByNovelId(id);
         chapterMapper.deleteByNovelId(id);
         volumeMapper.deleteByNovelId(id);
         novelMapper.deleteById(id);

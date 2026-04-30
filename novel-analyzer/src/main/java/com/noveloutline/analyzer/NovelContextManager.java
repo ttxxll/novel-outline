@@ -1,6 +1,8 @@
 package com.noveloutline.analyzer;
 
 import com.noveloutline.common.dto.ChapterAnalysisResult;
+import com.noveloutline.common.dto.CharacterEntry;
+import com.noveloutline.common.dto.FactionEntry;
 import com.noveloutline.common.dto.NovelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,21 +22,20 @@ public class NovelContextManager {
     }
 
     public void applyChapterResult(NovelContext context, ChapterAnalysisResult result, int chapterIndex) {
-        if (result == null) return;
+        if (result == null) {
+            return;
+        }
 
         if (context.protagonist == null && result.characters != null) {
             result.characters.stream()
                     .filter(c -> "主角".equals(c.role))
                     .findFirst()
-                    .ifPresent(c -> {
-                        context.protagonist = c.name;
-                        log.info("Protagonist identified: {}", c.name);
-                    });
+                    .ifPresent(c -> context.protagonist = c.name);
         }
 
         if (result.characters != null) {
-            for (ChapterAnalysisResult.CharacterEntry ch : result.characters) {
-                java.util.Optional<ChapterAnalysisResult.CharacterEntry> existing = context.characters.stream()
+            for (CharacterEntry ch : result.characters) {
+                java.util.Optional<CharacterEntry> existing = context.characters.stream()
                         .filter(ec -> ec.name.equals(ch.name))
                         .findFirst();
                 if (existing.isPresent()) {
@@ -46,8 +47,8 @@ public class NovelContextManager {
         }
 
         if (result.factions != null) {
-            for (ChapterAnalysisResult.FactionEntry f : result.factions) {
-                java.util.Optional<ChapterAnalysisResult.FactionEntry> existing = context.activeFactions.stream()
+            for (FactionEntry f : result.factions) {
+                java.util.Optional<FactionEntry> existing = context.activeFactions.stream()
                         .filter(ef -> ef.name.equals(f.name))
                         .findFirst();
                 if (existing.isPresent()) {

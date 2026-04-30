@@ -56,7 +56,6 @@ public class ChapterAnalysisHandler {
 
                 updateProgress(chapter);
                 contextManager.applyChapterResult(context, result, chapter.getIdx());
-
                 return resultJson;
             } catch (Exception e) {
                 log.error("Chapter {} '{}' attempt {}/{} error, ", chapter.getId(), chapter.getTitle(), attempt + 1, MAX_RETRIES, e);

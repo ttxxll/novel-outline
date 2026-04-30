@@ -29,6 +29,7 @@ public class NovelAnalysisEngine {
     private final VolumeAnalysisHandler volumeHandler;
     private final OutlineBuilder outlineBuilder;
     private final NovelContextManager contextManager;
+    private final NovelRecordManager recordManager;
     private final NovelMapper novelMapper;
     private final VolumeMapper volumeMapper;
     private final NovelOutlineMapper outlineMapper;
@@ -38,6 +39,7 @@ public class NovelAnalysisEngine {
     public NovelAnalysisEngine(VolumeAnalysisHandler volumeHandler,
                                OutlineBuilder outlineBuilder,
                                NovelContextManager contextManager,
+                               NovelRecordManager recordManager,
                                NovelMapper novelMapper,
                                VolumeMapper volumeMapper,
                                NovelOutlineMapper outlineMapper,
@@ -45,6 +47,7 @@ public class NovelAnalysisEngine {
         this.volumeHandler = volumeHandler;
         this.outlineBuilder = outlineBuilder;
         this.contextManager = contextManager;
+        this.recordManager = recordManager;
         this.novelMapper = novelMapper;
         this.volumeMapper = volumeMapper;
         this.outlineMapper = outlineMapper;
@@ -85,7 +88,6 @@ public class NovelAnalysisEngine {
             for (int vi = 0; vi < volumes.size(); vi++) {
                 Volume volume = volumes.get(vi);
                 log.info("=== Volume {}/{}: '{}' ===", vi + 1, volumes.size(), volume.getTitle());
-
                 VolumeAnalysisResult volResult = volumeHandler.analyze(volume, context);
                 if (volResult == null) {
                     log.error("Analysis aborted at volume '{}' due to chapter failure", volume.getTitle());
@@ -123,6 +125,8 @@ public class NovelAnalysisEngine {
             novel.setStatus(NovelStatus.COMPLETED);
             novelMapper.update(novel);
             log.info("Analysis completed successfully: novelId={}, title={}", novelId, novel.getTitle());
+
+            recordManager.saveRecordsFromNovel(novelId);
         } catch (Exception e) {
             log.error("Failed to build outline for novel {}", novelId, e);
             markNovelFailed(novelId);

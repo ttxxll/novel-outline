@@ -41,3 +41,91 @@ CREATE TABLE IF NOT EXISTS novel_outline (
     novel_id BIGINT NOT NULL UNIQUE,
     outline_json MEDIUMTEXT
 );
+
+CREATE TABLE IF NOT EXISTS character_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    role VARCHAR(32),
+    relationship_to_protagonist VARCHAR(100),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS weapon_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    grade VARCHAR(32),
+    significance VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS faction_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(32),
+    stance_toward_protagonist VARCHAR(32),
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS spirit_beast_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    level VARCHAR(32),
+    significance VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS technique_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    grade VARCHAR(32),
+    significance VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS spirit_herb_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    grade VARCHAR(32),
+    significance VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS elixir_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    grade VARCHAR(32),
+    significance VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS location_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    novel_id BIGINT NOT NULL,
+    first_chapter_id BIGINT,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(32),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_novel_name (novel_id, name)
+);
