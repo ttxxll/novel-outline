@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS novel_outline (
     outline_json MEDIUMTEXT
 );
 
-CREATE TABLE IF NOT EXISTS character
+CREATE TABLE IF NOT EXISTS novel_character
 (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,

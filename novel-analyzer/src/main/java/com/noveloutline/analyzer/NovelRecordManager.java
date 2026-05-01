@@ -3,7 +3,6 @@ package com.noveloutline.analyzer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.noveloutline.common.dto.*;
 import com.noveloutline.common.entity.*;
-import com.noveloutline.common.entity.Character;
 import com.noveloutline.common.enums.ChapterStatus;
 import com.noveloutline.common.mapper.*;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +94,7 @@ public class NovelRecordManager {
         int count = 0;
         for (CharacterEntry ch : entries) {
             if (ch.name == null || ch.name.isEmpty()) continue;
-            Character r = new Character();
+            NovelCharacter r = new NovelCharacter();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(ch.name);

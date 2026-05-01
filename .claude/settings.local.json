@@ -9,7 +9,8 @@
       "Bash(sed -i 's/class SpiritBeastRecord/class SpiritBeast/' novel-common/src/main/java/com/noveloutline/common/entity/SpiritBeast.java)",
       "Bash(sed -i 's/class TechniqueRecord/class Technique/' novel-common/src/main/java/com/noveloutline/common/entity/Technique.java)",
       "Read(//d/D/Project/IDEA_Projects/**)",
-      "Bash(mvn install *)"
+      "Bash(mvn install *)",
+      "Bash(mvn spring-boot:run *)"
     ]
   }
 }
