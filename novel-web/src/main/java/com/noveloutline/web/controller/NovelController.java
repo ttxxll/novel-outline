@@ -67,4 +67,11 @@ public class NovelController {
         log.debug("Querying progress: novelId={}", id);
         return novelService.getProgress(id);
     }
+
+    @PostMapping("/{id}/records")
+    public ResponseEntity<String> saveRecords(@PathVariable Long id) {
+        log.info("Saving records for novel: id={}", id);
+        novelService.saveRecords(id);
+        return ResponseEntity.ok("Records saved");
+    }
 }

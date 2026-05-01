@@ -1,6 +1,5 @@
 package com.noveloutline.service;
 
-import com.noveloutline.service.NovelRecordService;
 import com.noveloutline.common.dto.NovelListItem;
 import com.noveloutline.common.dto.NovelProgress;
 import com.noveloutline.common.entity.Chapter;
@@ -124,6 +123,11 @@ public class NovelService {
         progress.chaptersDone = (int) chapterMapper.countByNovelIdAndStatus(id, ChapterStatus.COMPLETED);
         return progress;
     }
+    public void saveRecords(Long id) {
+        log.info("Saving records for novel: novelId={}", id);
+        recordService.saveRecordsFromNovel(id);
+    }
+
     @Transactional
     public void delete(Long id) {
         log.info("Deleting novel and related data: novelId={}", id);

@@ -1,9 +1,11 @@
 package com.noveloutline.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.noveloutline.client.AiClient;
-import com.noveloutline.common.dto.*;
+import com.noveloutline.common.dto.ChapterAnalysisResult;
+import com.noveloutline.common.dto.NovelContext;
+import com.noveloutline.common.dto.OutlineResult;
+import com.noveloutline.common.dto.VolumeAnalysisResult;
 import com.noveloutline.common.entity.Chapter;
 import com.noveloutline.common.entity.Novel;
 import com.noveloutline.common.entity.NovelOutline;
@@ -45,8 +47,6 @@ public class AnalysisService {
     private ChapterMapper chapterMapper;
     @Autowired
     private NovelOutlineMapper outlineMapper;
-    @Autowired
-    private NovelRecordService recordService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -196,7 +196,6 @@ public class AnalysisService {
             novel.setStatus(NovelStatus.COMPLETED);
             novelMapper.update(novel);
             log.info("Analysis completed successfully: novelId={}, title={}", novelId, novel.getTitle());
-            recordService.saveRecordsFromNovel(novelId);
         } catch (Exception e) {
             log.error("Failed to build outline for novel {}", novelId, e);
             markNovelFailed(novelId);
@@ -239,10 +238,11 @@ public class AnalysisService {
     private static ThreadPoolExecutor createExecutor() {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 5, 10, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
+                new LinkedBlockingQueue<>(100),
                 r -> { Thread t = new Thread(r, "novel-analysis"); t.setDaemon(true); return t; },
-                new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.allowCoreThreadTimeOut(true);
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+        executor.allowCoreThreadTimeOut(false);
         return executor;
     }
 }

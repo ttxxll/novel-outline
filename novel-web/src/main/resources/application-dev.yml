@@ -21,7 +21,7 @@ spring:
       max-request-size: 50MB
 
 ai:
-  provider: deepseek
+  provider: mimo
   deepseek:
     api-key: ${DEEPSEEK_API_KEY:sk-f64b73fb1786421cb5756ed510f2a50a}
     base-url: https://api.deepseek.com
@@ -29,7 +29,7 @@ ai:
     max-tokens: 8192
     temperature: 0.3
   mimo:
-    api-key: ${MIMO_API_KEY:}
+    api-key: ${MIMO_API_KEY:sk-c0fseirpiimo1h4kpl6kzyq8cn85yy7lumu4pktymrsat0xt}
     base-url: https://api.xiaomimimo.com
     model: mimo-v2.5-pro
     max-tokens: 8192
