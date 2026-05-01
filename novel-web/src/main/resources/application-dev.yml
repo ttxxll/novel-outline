@@ -29,8 +29,12 @@ ai:
     max-tokens: 8192
     temperature: 0.3
   mimo:
-    api-key: ${MIMO_API_KEY:sk-c0fseirpiimo1h4kpl6kzyq8cn85yy7lumu4pktymrsat0xt}
+    # sk-cp9fcr65iuewkl4luf6l53h0r4wha1a7c9ubjhe6gwz4pmz6  183
+    # sk-c9rk8qk4rrlyjrriv4zh26wlct0bgcqtopepi8e06hgoofj6 188
+    # sk-c0fseirpiimo1h4kpl6kzyq8cn85yy7lumu4pktymrsat0xt 185
+    api-key: ${MIMO_API_KEY:sk-c9rk8qk4rrlyjrriv4zh26wlct0bgcqtopepi8e06hgoofj6}
     base-url: https://api.xiaomimimo.com
-    model: mimo-v2.5-pro
+    # mimo-v2.5-pro
+    model: mimo-v2.5
     max-tokens: 8192
     temperature: 0.3

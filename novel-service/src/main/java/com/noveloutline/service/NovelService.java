@@ -132,7 +132,7 @@ public class NovelService {
     public void delete(Long id) {
         log.info("Deleting novel and related data: novelId={}", id);
         outlineMapper.deleteByNovelId(id);
-        recordService.deleteByNovelId(id);
+        //recordService.deleteByNovelId(id);
         chapterMapper.deleteByNovelId(id);
         volumeMapper.deleteByNovelId(id);
         novelMapper.deleteById(id);

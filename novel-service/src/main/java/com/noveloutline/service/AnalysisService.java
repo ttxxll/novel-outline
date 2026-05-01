@@ -145,6 +145,7 @@ public class AnalysisService {
         try {
             String rawJson = aiClient.chat(ChapterPrompt.systemPrompt(), ChapterPrompt.userMessage(title, content, context));
             rawJson = AnalysisUtil.extractJson(rawJson);
+            log.info("callAiForChapter rawJson = {}", rawJson);
             return objectMapper.readValue(rawJson, ChapterAnalysisResult.class);
         } catch (Exception e) {
             log.error("Failed to parse chapter analysis result: title={}", title, e);

@@ -24,7 +24,7 @@ public class MiMoClient implements AiClient {
     @Override
     public String chat(String systemPrompt, String userMessage) {
         AiProperties.MiMoConfig config = properties.getMimo();
-        log.debug("Calling MiMo API: model={}, userMessageLength={}", config.getModel(), userMessage.length());
+        log.info("Calling MiMo API: model={}, userMessageLength={}", config.getModel(), userMessage.length());
 
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", config.getModel());
@@ -54,12 +54,12 @@ public class MiMoClient implements AiClient {
         long elapsed = System.currentTimeMillis() - startTime;
 
         String response = responseEntity.getBody();
-        log.debug("MiMo response: elapsed={}ms, responseLength={}", elapsed, response != null ? response.length() : 0);
+        log.info("MiMo response: elapsed={}ms, responseLength={}", elapsed, response != null ? response.length() : 0);
 
         try {
             JsonNode root = objectMapper.readTree(response);
             String content = root.path("content").get(0).path("text").asText();
-            log.info("MiMo API call successful: elapsed={}ms, contentLength={}", elapsed, content.length());
+            log.info("MiMo API call successful: elapsed={}ms, contentLength={}, content={}", elapsed, content.length(), content);
             return content;
         } catch (Exception e) {
             log.error("Failed to parse MiMo response: response={}", response, e);

@@ -10,7 +10,21 @@
       "Bash(sed -i 's/class TechniqueRecord/class Technique/' novel-common/src/main/java/com/noveloutline/common/entity/Technique.java)",
       "Read(//d/D/Project/IDEA_Projects/**)",
       "Bash(mvn install *)",
-      "Bash(mvn spring-boot:run *)"
+      "Bash(mvn spring-boot:run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm install *)",
+      "Bash(git init *)",
+      "Bash(git commit *)",
+      "Bash(git rm *)",
+      "Bash(curl -s http://localhost:8088/api/novels)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/api/novels)",
+      "Bash(curl -s http://localhost:3000/api/volumes/by-novel/2)",
+      "Bash(curl -s http://localhost:3000/api/chapters/by-novel/2)",
+      "Bash(curl -s http://localhost:3000/api/novels/2/progress)",
+      "Bash(taskkill //F //IM \"node.exe\")"
     ]
   }
 }
