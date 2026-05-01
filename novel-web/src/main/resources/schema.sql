@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS novel_outline (
     outline_json MEDIUMTEXT
 );
 
-CREATE TABLE IF NOT EXISTS character_record (
+CREATE TABLE IF NOT EXISTS character
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -53,7 +54,8 @@ CREATE TABLE IF NOT EXISTS character_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS weapon_record (
+CREATE TABLE IF NOT EXISTS weapon
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -64,7 +66,8 @@ CREATE TABLE IF NOT EXISTS weapon_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS faction_record (
+CREATE TABLE IF NOT EXISTS faction
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -76,7 +79,8 @@ CREATE TABLE IF NOT EXISTS faction_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS spirit_beast_record (
+CREATE TABLE IF NOT EXISTS spirit_beast
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -87,7 +91,8 @@ CREATE TABLE IF NOT EXISTS spirit_beast_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS technique_record (
+CREATE TABLE IF NOT EXISTS technique
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -98,7 +103,8 @@ CREATE TABLE IF NOT EXISTS technique_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS spirit_herb_record (
+CREATE TABLE IF NOT EXISTS spirit_herb
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -109,7 +115,8 @@ CREATE TABLE IF NOT EXISTS spirit_herb_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS elixir_record (
+CREATE TABLE IF NOT EXISTS elixir
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
@@ -120,7 +127,8 @@ CREATE TABLE IF NOT EXISTS elixir_record (
     UNIQUE KEY uk_novel_name (novel_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS location_record (
+CREATE TABLE IF NOT EXISTS location
+(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,

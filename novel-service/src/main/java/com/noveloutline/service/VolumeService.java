@@ -2,6 +2,7 @@ package com.noveloutline.service;
 
 import com.noveloutline.common.entity.Volume;
 import com.noveloutline.common.mapper.VolumeMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,11 +10,8 @@ import java.util.List;
 @Service
 public class VolumeService {
 
-    private final VolumeMapper volumeMapper;
-
-    public VolumeService(VolumeMapper volumeMapper) {
-        this.volumeMapper = volumeMapper;
-    }
+    @Autowired
+    private VolumeMapper volumeMapper;
 
     public Volume getById(Long id) {
         Volume volume = volumeMapper.findById(id);

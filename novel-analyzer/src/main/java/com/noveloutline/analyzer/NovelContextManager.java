@@ -4,17 +4,15 @@ import com.noveloutline.common.dto.ChapterAnalysisResult;
 import com.noveloutline.common.dto.CharacterEntry;
 import com.noveloutline.common.dto.FactionEntry;
 import com.noveloutline.common.dto.NovelContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class NovelContextManager {
-
-    private static final Logger log = LoggerFactory.getLogger(NovelContextManager.class);
 
     public NovelContext createInitial() {
         log.debug("Creating initial novel context");
@@ -66,8 +64,8 @@ public class NovelContextManager {
         if (result.conflicts != null) {
             context.activeConflicts.addAll(result.conflicts);
         }
-
         context.totalChaptersAnalyzed++;
+
         log.debug("Context updated after chapter {}: characters={}, factions={}, foreshadowing={}, conflicts={}",
                 chapterIndex,
                 context.characters.size(),
@@ -80,27 +78,22 @@ public class NovelContextManager {
         int beforeChars = context.characters.size();
         int beforeForeshadowing = context.unresolvedForeshadowing.size();
         int beforeConflicts = context.activeConflicts.size();
-
         if (context.unresolvedForeshadowing.size() > 10) {
             context.unresolvedForeshadowing = new ArrayList<>(
                     context.unresolvedForeshadowing.subList(
                             Math.max(0, context.unresolvedForeshadowing.size() - 10),
                             context.unresolvedForeshadowing.size()));
         }
-
         if (context.activeConflicts.size() > 5) {
             context.activeConflicts = new ArrayList<>(
                     context.activeConflicts.subList(
                             Math.max(0, context.activeConflicts.size() - 5),
                             context.activeConflicts.size()));
         }
-
         context.characters = context.characters.stream()
                 .filter(c -> !"次要".equals(c.role) || context.characters.indexOf(c) > context.characters.size() - 20)
                 .collect(Collectors.toList());
-
         context.recentSummary = volumeSummary;
-
         log.info("Context pruned: characters {}→{}, foreshadowing {}→{}, conflicts {}→{}",
                 beforeChars, context.characters.size(),
                 beforeForeshadowing, context.unresolvedForeshadowing.size(),

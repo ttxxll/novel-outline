@@ -3,51 +3,39 @@ package com.noveloutline.analyzer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.noveloutline.common.dto.*;
 import com.noveloutline.common.entity.*;
+import com.noveloutline.common.entity.Character;
 import com.noveloutline.common.enums.ChapterStatus;
 import com.noveloutline.common.mapper.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Slf4j
 public class NovelRecordManager {
 
-    private static final Logger log = LoggerFactory.getLogger(NovelRecordManager.class);
-
-    private final ChapterMapper chapterMapper;
-    private final ObjectMapper objectMapper;
-    private final CharacterRecordMapper characterRecordMapper;
-    private final WeaponRecordMapper weaponRecordMapper;
-    private final FactionRecordMapper factionRecordMapper;
-    private final SpiritBeastRecordMapper spiritBeastRecordMapper;
-    private final TechniqueRecordMapper techniqueRecordMapper;
-    private final SpiritHerbRecordMapper spiritHerbRecordMapper;
-    private final ElixirRecordMapper elixirRecordMapper;
-    private final LocationRecordMapper locationRecordMapper;
-
-    public NovelRecordManager(ChapterMapper chapterMapper,
-                              ObjectMapper objectMapper,
-                              CharacterRecordMapper characterRecordMapper,
-                              WeaponRecordMapper weaponRecordMapper,
-                              FactionRecordMapper factionRecordMapper,
-                              SpiritBeastRecordMapper spiritBeastRecordMapper,
-                              TechniqueRecordMapper techniqueRecordMapper,
-                              SpiritHerbRecordMapper spiritHerbRecordMapper,
-                              ElixirRecordMapper elixirRecordMapper,
-                              LocationRecordMapper locationRecordMapper) {
-        this.chapterMapper = chapterMapper;
-        this.objectMapper = objectMapper;
-        this.characterRecordMapper = characterRecordMapper;
-        this.weaponRecordMapper = weaponRecordMapper;
-        this.factionRecordMapper = factionRecordMapper;
-        this.spiritBeastRecordMapper = spiritBeastRecordMapper;
-        this.techniqueRecordMapper = techniqueRecordMapper;
-        this.spiritHerbRecordMapper = spiritHerbRecordMapper;
-        this.elixirRecordMapper = elixirRecordMapper;
-        this.locationRecordMapper = locationRecordMapper;
-    }
+    @Autowired
+    private ChapterMapper chapterMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private CharacterMapper characterRecordMapper;
+    @Autowired
+    private WeaponMapper weaponRecordMapper;
+    @Autowired
+    private FactionMapper factionRecordMapper;
+    @Autowired
+    private SpiritBeastMapper spiritBeastRecordMapper;
+    @Autowired
+    private TechniqueMapper techniqueRecordMapper;
+    @Autowired
+    private SpiritHerbMapper spiritHerbRecordMapper;
+    @Autowired
+    private ElixirMapper elixirRecordMapper;
+    @Autowired
+    private LocationMapper locationRecordMapper;
 
     /**
      * Build records from all completed chapters of a novel.
@@ -55,27 +43,21 @@ public class NovelRecordManager {
      */
     public void saveRecordsFromNovel(Long novelId) {
         log.info("Building records from chapters: novelId={}", novelId);
-
         deleteByNovelId(novelId);
-
         List<Chapter> chapters = chapterMapper.findByNovelId(novelId);
         int total = 0;
         int chaptersProcessed = 0;
-
         for (Chapter chapter : chapters) {
             if (!ChapterStatus.COMPLETED.equals(chapter.getStatus()) || chapter.getAnalysisResult() == null) {
                 continue;
             }
-
             ChapterAnalysisResult result = parseResult(chapter.getAnalysisResult());
             if (result == null) {
                 continue;
             }
-
             total += saveOneChapter(novelId, chapter.getId(), result);
             chaptersProcessed++;
         }
-
         log.info("Records built: novelId={}, chaptersProcessed={}, totalRecords={}", novelId, chaptersProcessed, total);
     }
 
@@ -113,7 +95,7 @@ public class NovelRecordManager {
         int count = 0;
         for (CharacterEntry ch : entries) {
             if (ch.name == null || ch.name.isEmpty()) continue;
-            CharacterRecord r = new CharacterRecord();
+            Character r = new Character();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(ch.name);
@@ -130,7 +112,7 @@ public class NovelRecordManager {
         int count = 0;
         for (FactionEntry f : entries) {
             if (f.name == null || f.name.isEmpty()) continue;
-            FactionRecord r = new FactionRecord();
+            Faction r = new Faction();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(f.name);
@@ -159,7 +141,7 @@ public class NovelRecordManager {
         int count = 0;
         for (LocationEntry loc : entries) {
             if (loc.name == null || loc.name.isEmpty()) continue;
-            LocationRecord r = new LocationRecord();
+            Location r = new Location();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(loc.name);
@@ -175,7 +157,7 @@ public class NovelRecordManager {
         int count = 0;
         for (WeaponEntry e : entries) {
             if (e.name == null || e.name.isEmpty()) continue;
-            WeaponRecord r = new WeaponRecord();
+            Weapon r = new Weapon();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(e.name);
@@ -192,7 +174,7 @@ public class NovelRecordManager {
         int count = 0;
         for (TechniqueEntry e : entries) {
             if (e.name == null || e.name.isEmpty()) continue;
-            TechniqueRecord r = new TechniqueRecord();
+            Technique r = new Technique();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(e.name);
@@ -209,7 +191,7 @@ public class NovelRecordManager {
         int count = 0;
         for (ElixirEntry e : entries) {
             if (e.name == null || e.name.isEmpty()) continue;
-            ElixirRecord r = new ElixirRecord();
+            Elixir r = new Elixir();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(e.name);
@@ -226,7 +208,7 @@ public class NovelRecordManager {
         int count = 0;
         for (SpiritBeastEntry e : entries) {
             if (e.name == null || e.name.isEmpty()) continue;
-            SpiritBeastRecord r = new SpiritBeastRecord();
+            SpiritBeast r = new SpiritBeast();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(e.name);
@@ -243,7 +225,7 @@ public class NovelRecordManager {
         int count = 0;
         for (SpiritHerbEntry e : entries) {
             if (e.name == null || e.name.isEmpty()) continue;
-            SpiritHerbRecord r = new SpiritHerbRecord();
+            SpiritHerb r = new SpiritHerb();
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(e.name);

@@ -5,12 +5,12 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class SpiritBeastRecord {
+public class Technique {
     private Long id;
     private Long novelId;
     private Long firstChapterId;
     private String name;
-    private String level;
+    private String grade;
     private String significance;
     private Date createdAt;
 }

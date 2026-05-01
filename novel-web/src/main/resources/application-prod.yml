@@ -19,9 +19,17 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
-deepseek:
-  api-key: ${DEEPSEEK_API_KEY:}
-  base-url: https://api.deepseek.com
-  model: deepseek-v4-pro
-  max-tokens: 8192
-  temperature: 0.3
+ai:
+  provider: deepseek
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: https://api.deepseek.com
+    model: deepseek-v4-pro
+    max-tokens: 8192
+    temperature: 0.3
+  mimo:
+    api-key: ${MIMO_API_KEY:}
+    base-url: https://api.xiaomimimo.com
+    model: mimo-v2.5-pro
+    max-tokens: 8192
+    temperature: 0.3

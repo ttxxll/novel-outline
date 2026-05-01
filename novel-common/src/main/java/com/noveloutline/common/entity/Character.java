@@ -5,11 +5,12 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class LocationRecord {
+public class Character {
     private Long id;
     private Long novelId;
     private Long firstChapterId;
     private String name;
-    private String type;
+    private String role;
+    private String relationshipToProtagonist;
     private Date createdAt;
 }

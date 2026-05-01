@@ -2,27 +2,21 @@ package com.noveloutline.service;
 
 import com.noveloutline.common.entity.ParseRule;
 import com.noveloutline.common.mapper.ParseRuleMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class ParseRuleService {
 
-    private static final Logger log = LoggerFactory.getLogger(ParseRuleService.class);
-
-    private final ParseRuleMapper mapper;
-
-    public ParseRuleService(ParseRuleMapper mapper) {
-        this.mapper = mapper;
-    }
-
+    @Autowired
+    private ParseRuleMapper mapper;
     public List<ParseRule> listAll() {
         return mapper.findAll();
     }
-
     public ParseRule getById(Long id) {
         ParseRule rule = mapper.findById(id);
         if (rule == null) {
@@ -30,13 +24,11 @@ public class ParseRuleService {
         }
         return rule;
     }
-
     public ParseRule create(ParseRule rule) {
         mapper.insert(rule);
         log.info("ParseRule created: id={}, name={}", rule.getId(), rule.getName());
         return rule;
     }
-
     public ParseRule update(Long id, ParseRule updated) {
         ParseRule existing = getById(id);
         existing.setName(updated.getName());

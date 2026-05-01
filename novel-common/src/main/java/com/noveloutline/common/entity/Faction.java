@@ -5,12 +5,13 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class WeaponRecord {
+public class Faction {
     private Long id;
     private Long novelId;
     private Long firstChapterId;
     private String name;
-    private String grade;
-    private String significance;
+    private String type;
+    private String stanceTowardProtagonist;
+    private String description;
     private Date createdAt;
 }

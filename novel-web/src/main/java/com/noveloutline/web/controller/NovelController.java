@@ -5,8 +5,8 @@ import com.noveloutline.common.dto.NovelProgress;
 import com.noveloutline.common.entity.Novel;
 import com.noveloutline.service.AnalysisOrchestrator;
 import com.noveloutline.service.NovelService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,17 +17,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/novels")
+@Slf4j
 public class NovelController {
 
-    private static final Logger log = LoggerFactory.getLogger(NovelController.class);
-
-    private final NovelService novelService;
-    private final AnalysisOrchestrator orchestrator;
-
-    public NovelController(NovelService novelService, AnalysisOrchestrator orchestrator) {
-        this.novelService = novelService;
-        this.orchestrator = orchestrator;
-    }
+    @Autowired
+    private NovelService novelService;
+    @Autowired
+    private AnalysisOrchestrator orchestrator;
 
     @PostMapping
     public ResponseEntity<Novel> upload(

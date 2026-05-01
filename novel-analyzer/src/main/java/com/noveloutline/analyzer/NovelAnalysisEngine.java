@@ -11,8 +11,8 @@ import com.noveloutline.common.enums.NovelStatus;
 import com.noveloutline.common.mapper.NovelMapper;
 import com.noveloutline.common.mapper.NovelOutlineMapper;
 import com.noveloutline.common.mapper.VolumeMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -22,44 +22,37 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Slf4j
 public class NovelAnalysisEngine {
 
-    private static final Logger log = LoggerFactory.getLogger(NovelAnalysisEngine.class);
+    private final ThreadPoolExecutor analysisExecutor = createAnalysisExecutor();
 
-    private final VolumeAnalysisHandler volumeHandler;
-    private final OutlineBuilder outlineBuilder;
-    private final NovelContextManager contextManager;
-    private final NovelRecordManager recordManager;
-    private final NovelMapper novelMapper;
-    private final VolumeMapper volumeMapper;
-    private final NovelOutlineMapper outlineMapper;
-    private final ObjectMapper objectMapper;
-    private final ThreadPoolExecutor analysisExecutor;
+    @Autowired
+    private VolumeAnalysisHandler volumeHandler;
+    @Autowired
+    private OutlineBuilder outlineBuilder;
+    @Autowired
+    private NovelContextManager contextManager;
+    @Autowired
+    private NovelRecordManager recordManager;
+    @Autowired
+    private NovelMapper novelMapper;
+    @Autowired
+    private VolumeMapper volumeMapper;
+    @Autowired
+    private NovelOutlineMapper outlineMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    public NovelAnalysisEngine(VolumeAnalysisHandler volumeHandler,
-                               OutlineBuilder outlineBuilder,
-                               NovelContextManager contextManager,
-                               NovelRecordManager recordManager,
-                               NovelMapper novelMapper,
-                               VolumeMapper volumeMapper,
-                               NovelOutlineMapper outlineMapper,
-                               ObjectMapper objectMapper) {
-        this.volumeHandler = volumeHandler;
-        this.outlineBuilder = outlineBuilder;
-        this.contextManager = contextManager;
-        this.recordManager = recordManager;
-        this.novelMapper = novelMapper;
-        this.volumeMapper = volumeMapper;
-        this.outlineMapper = outlineMapper;
-        this.objectMapper = objectMapper;
-
-        this.analysisExecutor = new ThreadPoolExecutor(
+    private static ThreadPoolExecutor createAnalysisExecutor() {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 5, 10,
                 60, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 r -> { Thread t = new Thread(r, "novel-analysis"); t.setDaemon(true); return t; },
                 new ThreadPoolExecutor.CallerRunsPolicy());
-        this.analysisExecutor.allowCoreThreadTimeOut(true);
+        executor.allowCoreThreadTimeOut(true);
+        return executor;
     }
 
     /**
@@ -70,11 +63,9 @@ public class NovelAnalysisEngine {
         if (novel == null) {
             throw new IllegalArgumentException("Novel not found: " + novelId);
         }
-
         log.info("Starting analysis: novelId={}, title={}", novelId, novel.getTitle());
         novel.setStatus(NovelStatus.ANALYZING);
         novelMapper.update(novel);
-
         analysisExecutor.submit(() -> doAnalyzeNovel(novelId));
     }
 
@@ -84,7 +75,6 @@ public class NovelAnalysisEngine {
             List<Volume> volumes = volumeMapper.findByNovelId(novelId);
             log.info("Analyzing {} volumes", volumes.size());
             List<VolumeAnalysisResult> volumeResults = new ArrayList<>();
-
             for (int vi = 0; vi < volumes.size(); vi++) {
                 Volume volume = volumes.get(vi);
                 log.info("=== Volume {}/{}: '{}' ===", vi + 1, volumes.size(), volume.getTitle());
@@ -97,7 +87,6 @@ public class NovelAnalysisEngine {
                 volumeResults.add(volResult);
                 contextManager.pruneAfterVolume(context, volResult.volumeSummary);
             }
-
             buildAndSaveOutline(novelId, volumeResults);
         } catch (Exception e) {
             log.error("Analysis failed for novel {}", novelId, e);
@@ -110,7 +99,6 @@ public class NovelAnalysisEngine {
         log.info("Building final outline...");
         try {
             OutlineResult outline = outlineBuilder.build(novel.getTitle(), volumeResults);
-
             NovelOutline outlineEntity = outlineMapper.findByNovelId(novelId);
             String outlineJson = objectMapper.writeValueAsString(outline);
             if (outlineEntity == null) {
@@ -121,11 +109,9 @@ public class NovelAnalysisEngine {
             } else {
                 outlineMapper.updateByNovelId(novelId, outlineJson);
             }
-
             novel.setStatus(NovelStatus.COMPLETED);
             novelMapper.update(novel);
             log.info("Analysis completed successfully: novelId={}, title={}", novelId, novel.getTitle());
-
             recordManager.saveRecordsFromNovel(novelId);
         } catch (Exception e) {
             log.error("Failed to build outline for novel {}", novelId, e);

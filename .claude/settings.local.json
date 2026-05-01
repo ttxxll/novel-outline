@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(cd /d D:\\\\Project\\\\IDEA_Projects\\\\novel-outline)",
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(sed -i 's/class CharacterRecord/class Character/' novel-common/src/main/java/com/noveloutline/common/entity/Character.java)",
+      "Bash(sed -i 's/class WeaponRecord/class Weapon/' novel-common/src/main/java/com/noveloutline/common/entity/Weapon.java)",
+      "Bash(sed -i 's/class FactionRecord/class Faction/' novel-common/src/main/java/com/noveloutline/common/entity/Faction.java)",
+      "Bash(sed -i 's/class SpiritBeastRecord/class SpiritBeast/' novel-common/src/main/java/com/noveloutline/common/entity/SpiritBeast.java)",
+      "Bash(sed -i 's/class TechniqueRecord/class Technique/' novel-common/src/main/java/com/noveloutline/common/entity/Technique.java)",
+      "Read(//d/D/Project/IDEA_Projects/**)",
+      "Bash(mvn install *)"
     ]
   }
 }

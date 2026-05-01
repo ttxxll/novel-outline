@@ -2,6 +2,7 @@ package com.noveloutline.service;
 
 import com.noveloutline.common.entity.Chapter;
 import com.noveloutline.common.mapper.ChapterMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,11 +10,8 @@ import java.util.List;
 @Service
 public class ChapterService {
 
-    private final ChapterMapper chapterMapper;
-
-    public ChapterService(ChapterMapper chapterMapper) {
-        this.chapterMapper = chapterMapper;
-    }
+    @Autowired
+    private ChapterMapper chapterMapper;
 
     public Chapter getById(Long id) {
         Chapter chapter = chapterMapper.findById(id);

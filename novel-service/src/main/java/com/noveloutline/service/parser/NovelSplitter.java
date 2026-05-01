@@ -1,9 +1,8 @@
 package com.noveloutline.service.parser;
 
 import com.noveloutline.common.entity.ParseRule;
+import lombok.extern.slf4j.Slf4j;
 import org.mozilla.universalchardet.UniversalDetector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -14,31 +13,24 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class NovelSplitter {
-
-    private static final Logger log = LoggerFactory.getLogger(NovelSplitter.class);
-
     public static class ChapterSegment {
         public String title;
         public String content;
         public int volumeIndex;
         public String volumeTitle;
     }
-
     public static class SplitResult {
         public List<String> volumeTitles = new ArrayList<>();
         public List<ChapterSegment> segments = new ArrayList<>();
     }
-
     public SplitResult split(Path filePath, ParseRule rule) throws IOException {
         String content = readWithDetectedEncoding(filePath);
         log.info("File content length: {} chars", content.length());
-
         SplitResult result = new SplitResult();
-
         String volumeRegex = rule.getVolumeRegex();
         String chapterRegex = rule.getChapterRegex();
-
         if (volumeRegex != null && !volumeRegex.trim().isEmpty()) {
             log.info("Splitting with volumes: volumeRegex={}, chapterRegex={}", volumeRegex, chapterRegex);
             splitWithVolumes(content, volumeRegex, chapterRegex, result);
@@ -46,7 +38,6 @@ public class NovelSplitter {
             log.info("Splitting chapters only: chapterRegex={}", chapterRegex);
             splitChaptersOnly(content, chapterRegex, result);
         }
-
         log.info("Split result: {} volumes, {} chapters", result.volumeTitles.size(), result.segments.size());
         for (int i = 0; i < result.segments.size(); i++) {
             ChapterSegment seg = result.segments.get(i);
@@ -55,15 +46,12 @@ public class NovelSplitter {
         }
         return result;
     }
-
     private void splitWithVolumes(String content, String volumeRegex, String chapterRegex, SplitResult result) {
         Pattern volPattern = Pattern.compile(volumeRegex, Pattern.MULTILINE);
         Pattern chPattern = Pattern.compile(chapterRegex, Pattern.MULTILINE);
-
         List<int[]> volRanges = new ArrayList<>();
         Matcher volMatcher = volPattern.matcher(content);
         int lastVolStart = -1;
-
         while (volMatcher.find()) {
             if (lastVolStart >= 0) {
                 volRanges.add(new int[]{lastVolStart, volMatcher.start()});
@@ -73,22 +61,18 @@ public class NovelSplitter {
         if (lastVolStart >= 0) {
             volRanges.add(new int[]{lastVolStart, content.length()});
         }
-
         if (volRanges.isEmpty()) {
             splitChaptersOnly(content, chapterRegex, result);
             return;
         }
-
         int volIdx = 0;
         for (int[] range : volRanges) {
             String volContent = content.substring(range[0], range[1]);
             Matcher chMatcher = chPattern.matcher(volContent);
-
             int prevChStart = -1;
             String prevChTitle = null;
             List<int[]> chRanges = new ArrayList<>();
             List<String> chTitles = new ArrayList<>();
-
             while (chMatcher.find()) {
                 if (prevChStart >= 0) {
                     chRanges.add(new int[]{prevChStart, chMatcher.start()});
@@ -101,10 +85,8 @@ public class NovelSplitter {
                 chRanges.add(new int[]{prevChStart, volContent.length()});
                 chTitles.add(prevChTitle);
             }
-
             String firstLine = volContent.split("\\R", 2)[0].trim();
             String volTitle = firstLine.length() < 100 ? firstLine : ("第" + (volIdx + 1) + "卷");
-
             for (int i = 0; i < chRanges.size(); i++) {
                 int[] cr = chRanges.get(i);
                 ChapterSegment seg = new ChapterSegment();
@@ -114,21 +96,17 @@ public class NovelSplitter {
                 seg.content = volContent.substring(cr[0], cr[1]).trim();
                 result.segments.add(seg);
             }
-
             if (!result.volumeTitles.contains(volTitle)) {
                 result.volumeTitles.add(volTitle);
             }
             volIdx++;
         }
     }
-
     private void splitChaptersOnly(String content, String chapterRegex, SplitResult result) {
         Pattern chPattern = Pattern.compile(chapterRegex, Pattern.MULTILINE);
         Matcher chMatcher = chPattern.matcher(content);
-
         int prevStart = -1;
         String prevTitle = null;
-
         while (chMatcher.find()) {
             if (prevStart >= 0) {
                 ChapterSegment seg = new ChapterSegment();
@@ -149,31 +127,25 @@ public class NovelSplitter {
             seg.content = content.substring(prevStart).trim();
             result.segments.add(seg);
         }
-
         if (!result.volumeTitles.contains("正文")) {
             result.volumeTitles.add("正文");
         }
     }
-
     private String readWithDetectedEncoding(Path filePath) throws IOException {
         byte[] bytes = Files.readAllBytes(filePath);
-
         UniversalDetector detector = new UniversalDetector(null);
         detector.handleData(bytes, 0, bytes.length);
         detector.dataEnd();
         String detected = detector.getDetectedCharset();
         detector.reset();
-
         String encoding = (detected != null) ? detected : "UTF-8";
         log.info("Detected encoding: {} for file: {}", encoding, filePath.getFileName());
-
         Charset charset;
         try {
             charset = Charset.forName(encoding);
         } catch (Exception e) {
             charset = Charset.forName("GBK");
         }
-
         return new String(bytes, charset);
     }
 }

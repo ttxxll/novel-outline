@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class ElixirRecord {
+public class Elixir {
     private Long id;
     private Long novelId;
     private Long firstChapterId;

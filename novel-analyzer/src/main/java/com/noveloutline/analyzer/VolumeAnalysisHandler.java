@@ -9,45 +9,30 @@ import com.noveloutline.common.entity.Volume;
 import com.noveloutline.common.enums.ChapterStatus;
 import com.noveloutline.common.mapper.ChapterMapper;
 import com.noveloutline.common.mapper.VolumeMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class VolumeAnalysisHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(VolumeAnalysisHandler.class);
+    @Autowired
+    private ChapterAnalysisHandler chapterHandler;
+    @Autowired
+    private VolumeAggregator volumeAggregator;
+    @Autowired
+    private NovelContextManager contextManager;
+    @Autowired
+    private ChapterMapper chapterMapper;
+    @Autowired
+    private VolumeMapper volumeMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    private final ChapterAnalysisHandler chapterHandler;
-    private final VolumeAggregator volumeAggregator;
-    private final NovelContextManager contextManager;
-    private final ChapterMapper chapterMapper;
-    private final VolumeMapper volumeMapper;
-    private final ObjectMapper objectMapper;
-
-    public VolumeAnalysisHandler(ChapterAnalysisHandler chapterHandler,
-                                 VolumeAggregator volumeAggregator,
-                                 NovelContextManager contextManager,
-                                 ChapterMapper chapterMapper,
-                                 VolumeMapper volumeMapper,
-                                 ObjectMapper objectMapper) {
-        this.chapterHandler = chapterHandler;
-        this.volumeAggregator = volumeAggregator;
-        this.contextManager = contextManager;
-        this.chapterMapper = chapterMapper;
-        this.volumeMapper = volumeMapper;
-        this.objectMapper = objectMapper;
-    }
-
-    /**
-     * Analyze all chapters in a volume sequentially, then aggregate.
-     * Supports resume: skips chapters already marked COMPLETED.
-     *
-     * @return volume analysis result, or null if a chapter failed and processing should stop
-     */
     public VolumeAnalysisResult analyze(Volume volume, NovelContext context) {
         List<Chapter> chapters = chapterMapper.findByVolumeId(volume.getId());
         log.info("Volume '{}': {} chapters to analyze", volume.getTitle(), chapters.size());
@@ -64,7 +49,8 @@ public class VolumeAnalysisHandler {
                 continue;
             }
 
-            log.info("=== Chapter {}/{}: '{}' ({} words) ===", ci + 1, chapters.size(), chapter.getTitle(), chapter.getWordCount());
+            log.info("=== Chapter {}/{}: '{}' ({} words) ===",
+                    ci + 1, chapters.size(), chapter.getTitle(), chapter.getWordCount());
 
             String resultJson = chapterHandler.analyze(chapter, context);
             if (resultJson == null) {

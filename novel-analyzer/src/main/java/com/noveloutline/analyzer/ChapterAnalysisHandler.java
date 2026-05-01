@@ -8,33 +8,25 @@ import com.noveloutline.common.entity.Novel;
 import com.noveloutline.common.enums.ChapterStatus;
 import com.noveloutline.common.mapper.ChapterMapper;
 import com.noveloutline.common.mapper.NovelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ChapterAnalysisHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ChapterAnalysisHandler.class);
     private static final int MAX_RETRIES = 3;
-
-    private final ChapterAnalyzer chapterAnalyzer;
-    private final NovelContextManager contextManager;
-    private final ChapterMapper chapterMapper;
-    private final NovelMapper novelMapper;
-    private final ObjectMapper objectMapper;
-
-    public ChapterAnalysisHandler(ChapterAnalyzer chapterAnalyzer,
-                                  NovelContextManager contextManager,
-                                  ChapterMapper chapterMapper,
-                                  NovelMapper novelMapper,
-                                  ObjectMapper objectMapper) {
-        this.chapterAnalyzer = chapterAnalyzer;
-        this.contextManager = contextManager;
-        this.chapterMapper = chapterMapper;
-        this.novelMapper = novelMapper;
-        this.objectMapper = objectMapper;
-    }
+    @Autowired
+    private ChapterAnalyzer chapterAnalyzer;
+    @Autowired
+    private NovelContextManager contextManager;
+    @Autowired
+    private ChapterMapper chapterMapper;
+    @Autowired
+    private NovelMapper novelMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * Analyze a single chapter with retry. On success the chapter is updated in DB,
@@ -49,11 +41,9 @@ public class ChapterAnalysisHandler {
                 ChapterAnalysisResult result = chapterAnalyzer.analyze(
                         chapter.getTitle(), chapter.getRawContent(), context);
                 String resultJson = objectMapper.writeValueAsString(result);
-
                 chapter.setAnalysisResult(resultJson);
                 chapter.setStatus(ChapterStatus.COMPLETED);
                 chapterMapper.update(chapter);
-
                 updateProgress(chapter);
                 contextManager.applyChapterResult(context, result, chapter.getIdx());
                 return resultJson;
@@ -64,7 +54,6 @@ public class ChapterAnalysisHandler {
                 }
             }
         }
-
         log.error("Chapter {} '{}' failed after {} attempts", chapter.getId(), chapter.getTitle(), MAX_RETRIES);
         chapter.setStatus(ChapterStatus.FAILED);
         chapterMapper.update(chapter);
@@ -86,4 +75,5 @@ public class ChapterAnalysisHandler {
             Thread.currentThread().interrupt();
         }
     }
+
 }
