@@ -1,4 +1,4 @@
-package com.noveloutline.analyzer.config;
+package com.noveloutline.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

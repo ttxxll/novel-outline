@@ -1,4 +1,4 @@
-package com.noveloutline.analyzer.prompt;
+package com.noveloutline.prompt;
 
 public final class OutlinePrompt {
 

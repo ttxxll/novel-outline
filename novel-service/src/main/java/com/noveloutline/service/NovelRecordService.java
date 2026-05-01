@@ -1,4 +1,4 @@
-package com.noveloutline.analyzer;
+package com.noveloutline.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.noveloutline.common.dto.*;
@@ -7,13 +7,13 @@ import com.noveloutline.common.enums.ChapterStatus;
 import com.noveloutline.common.mapper.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 @Slf4j
-public class NovelRecordManager {
+public class NovelRecordService {
 
     @Autowired
     private ChapterMapper chapterMapper;
@@ -36,10 +36,6 @@ public class NovelRecordManager {
     @Autowired
     private LocationMapper locationRecordMapper;
 
-    /**
-     * Build records from all completed chapters of a novel.
-     * Deletes existing records first so re-processing is safe.
-     */
     public void saveRecordsFromNovel(Long novelId) {
         log.info("Building records from chapters: novelId={}", novelId);
         deleteByNovelId(novelId);

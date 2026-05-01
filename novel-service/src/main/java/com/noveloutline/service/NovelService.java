@@ -1,6 +1,6 @@
 package com.noveloutline.service;
 
-import com.noveloutline.analyzer.NovelRecordManager;
+import com.noveloutline.service.NovelRecordService;
 import com.noveloutline.common.dto.NovelListItem;
 import com.noveloutline.common.dto.NovelProgress;
 import com.noveloutline.common.entity.Chapter;
@@ -44,7 +44,7 @@ public class NovelService {
     @Autowired
     private ParseRuleService parseRuleService;
     @Autowired
-    private NovelRecordManager recordManager;
+    private NovelRecordService recordService;
     @Transactional
     public Novel uploadAndParse(MultipartFile file, Long parseRuleId) throws IOException {
         ParseRule rule = parseRuleService.getById(parseRuleId);
@@ -128,7 +128,7 @@ public class NovelService {
     public void delete(Long id) {
         log.info("Deleting novel and related data: novelId={}", id);
         outlineMapper.deleteByNovelId(id);
-        recordManager.deleteByNovelId(id);
+        recordService.deleteByNovelId(id);
         chapterMapper.deleteByNovelId(id);
         volumeMapper.deleteByNovelId(id);
         novelMapper.deleteById(id);

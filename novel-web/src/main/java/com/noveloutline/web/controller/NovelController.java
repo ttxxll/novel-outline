@@ -3,7 +3,7 @@ package com.noveloutline.web.controller;
 import com.noveloutline.common.dto.NovelListItem;
 import com.noveloutline.common.dto.NovelProgress;
 import com.noveloutline.common.entity.Novel;
-import com.noveloutline.service.AnalysisOrchestrator;
+import com.noveloutline.service.AnalysisService;
 import com.noveloutline.service.NovelService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class NovelController {
     @Autowired
     private NovelService novelService;
     @Autowired
-    private AnalysisOrchestrator orchestrator;
+    private AnalysisService analysisService;
 
     @PostMapping
     public ResponseEntity<Novel> upload(
@@ -58,7 +58,7 @@ public class NovelController {
     @PostMapping("/{id}/analyze")
     public ResponseEntity<String> startAnalysis(@PathVariable Long id) {
         log.info("Starting analysis for novel: id={}", id);
-        orchestrator.startAnalysis(id);
+        analysisService.startAnalysis(id);
         return ResponseEntity.accepted().body("Analysis started");
     }
 

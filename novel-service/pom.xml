@@ -20,12 +20,12 @@
             <artifactId>novel-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.noveloutline</groupId>
-            <artifactId>novel-analyzer</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.juniversalchardet</groupId>

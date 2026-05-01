@@ -1,36 +1,37 @@
-package com.noveloutline.analyzer;
+package com.noveloutline.util;
 
 import com.noveloutline.common.dto.ChapterAnalysisResult;
 import com.noveloutline.common.dto.CharacterEntry;
 import com.noveloutline.common.dto.FactionEntry;
 import com.noveloutline.common.dto.NovelContext;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-@Component
-@Slf4j
-public class NovelContextManager {
+public final class AnalysisUtil {
 
-    public NovelContext createInitial() {
-        log.debug("Creating initial novel context");
-        return new NovelContext();
+    private AnalysisUtil() {}
+
+    public static String extractJson(String raw) {
+        String trimmed = raw.trim();
+        int start = trimmed.indexOf('{');
+        int end = trimmed.lastIndexOf('}');
+        if (start >= 0 && end > start) {
+            return trimmed.substring(start, end + 1);
+        }
+        return trimmed;
     }
 
-    public void applyChapterResult(NovelContext context, ChapterAnalysisResult result, int chapterIndex) {
+    public static void applyChapterResult(NovelContext context, ChapterAnalysisResult result, int chapterIndex) {
         if (result == null) {
             return;
         }
-
         if (context.protagonist == null && result.characters != null) {
             result.characters.stream()
                     .filter(c -> "主角".equals(c.role))
                     .findFirst()
                     .ifPresent(c -> context.protagonist = c.name);
         }
-
         if (result.characters != null) {
             for (CharacterEntry ch : result.characters) {
                 java.util.Optional<CharacterEntry> existing = context.characters.stream()
@@ -43,7 +44,6 @@ public class NovelContextManager {
                 }
             }
         }
-
         if (result.factions != null) {
             for (FactionEntry f : result.factions) {
                 java.util.Optional<FactionEntry> existing = context.activeFactions.stream()
@@ -56,28 +56,16 @@ public class NovelContextManager {
                 }
             }
         }
-
         if (result.foreshadowing != null) {
             context.unresolvedForeshadowing.addAll(result.foreshadowing);
         }
-
         if (result.conflicts != null) {
             context.activeConflicts.addAll(result.conflicts);
         }
         context.totalChaptersAnalyzed++;
-
-        log.debug("Context updated after chapter {}: characters={}, factions={}, foreshadowing={}, conflicts={}",
-                chapterIndex,
-                context.characters.size(),
-                context.activeFactions.size(),
-                context.unresolvedForeshadowing.size(),
-                context.activeConflicts.size());
     }
 
-    public void pruneAfterVolume(NovelContext context, String volumeSummary) {
-        int beforeChars = context.characters.size();
-        int beforeForeshadowing = context.unresolvedForeshadowing.size();
-        int beforeConflicts = context.activeConflicts.size();
+    public static void pruneAfterVolume(NovelContext context, String volumeSummary) {
         if (context.unresolvedForeshadowing.size() > 10) {
             context.unresolvedForeshadowing = new ArrayList<>(
                     context.unresolvedForeshadowing.subList(
@@ -94,9 +82,5 @@ public class NovelContextManager {
                 .filter(c -> !"次要".equals(c.role) || context.characters.indexOf(c) > context.characters.size() - 20)
                 .collect(Collectors.toList());
         context.recentSummary = volumeSummary;
-        log.info("Context pruned: characters {}→{}, foreshadowing {}→{}, conflicts {}→{}",
-                beforeChars, context.characters.size(),
-                beforeForeshadowing, context.unresolvedForeshadowing.size(),
-                beforeConflicts, context.activeConflicts.size());
     }
 }

@@ -1,4 +1,4 @@
-package com.noveloutline.analyzer.prompt;
+package com.noveloutline.prompt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.noveloutline.common.dto.NovelContext;

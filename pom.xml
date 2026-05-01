@@ -19,7 +19,6 @@
 
     <modules>
         <module>novel-common</module>
-        <module>novel-analyzer</module>
         <module>novel-service</module>
         <module>novel-web</module>
     </modules>
@@ -39,11 +38,6 @@
             <dependency>
                 <groupId>com.noveloutline</groupId>
                 <artifactId>novel-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.noveloutline</groupId>
-                <artifactId>novel-analyzer</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
