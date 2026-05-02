@@ -27,13 +27,13 @@ public class MiMoClient implements AiClient {
     }
 
     @Override
-    public String chat(String systemPrompt, String userMessage) {
+    public String chat(String systemPrompt, String userMessage, int maxTokens) {
         AiProperties.MiMoConfig config = properties.getMimo();
         log.info("Calling MiMo API: model={}, userMessageLength={}", config.getModel(), userMessage.length());
 
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", config.getModel());
-        requestBody.put("max_tokens", config.getMaxTokens());
+        requestBody.put("max_tokens", maxTokens);
         requestBody.put("temperature", config.getTemperature());
         requestBody.put("system", systemPrompt);
 

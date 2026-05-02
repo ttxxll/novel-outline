@@ -1,5 +1,5 @@
 package com.noveloutline.client;
 
 public interface AiClient {
-    String chat(String systemPrompt, String userMessage);
+    String chat(String systemPrompt, String userMessage, int maxTokens);
 }

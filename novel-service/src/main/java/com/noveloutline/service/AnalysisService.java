@@ -35,6 +35,9 @@ import java.util.concurrent.TimeUnit;
 public class AnalysisService {
 
     private static final int MAX_RETRIES = 3;
+    private static final int CHAPTER_MAX_TOKENS = 8192;
+    private static final int VOLUME_MAX_TOKENS = 16384;
+    private static final int OUTLINE_MAX_TOKENS = 65536;
     private final ThreadPoolExecutor executor = createExecutor();
 
     @Autowired
@@ -154,7 +157,7 @@ public class AnalysisService {
     private ChapterAnalysisResult callAiForChapter(String title, String content, NovelContext context) {
         log.info("Analyzing chapter: title={}, contentLength={}, totalChaptersAnalyzed={}", title, content.length(), context.totalChaptersAnalyzed);
         try {
-            String rawJson = aiClient.chat(ChapterPrompt.systemPrompt(), ChapterPrompt.userMessage(title, content, context));
+            String rawJson = aiClient.chat(ChapterPrompt.systemPrompt(), ChapterPrompt.userMessage(title, content, context), CHAPTER_MAX_TOKENS);
             rawJson = AnalysisUtil.extractJson(rawJson);
             log.info("callAiForChapter rawJson = {}", rawJson);
             return objectMapper.readValue(rawJson, ChapterAnalysisResult.class);
@@ -168,7 +171,7 @@ public class AnalysisService {
         log.info("Aggregating volume: title={}, chapterCount={}", title, chapterJsons.size());
         try {
             String chaptersJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(chapterJsons);
-            String rawJson = aiClient.chat(VolumePrompt.systemPrompt(), VolumePrompt.userMessage(title, chaptersJson));
+            String rawJson = aiClient.chat(VolumePrompt.systemPrompt(), VolumePrompt.userMessage(title, chaptersJson), VOLUME_MAX_TOKENS);
             rawJson = AnalysisUtil.extractJson(rawJson);
             log.info("aggregateVolume rawJson={}", rawJson);
             return objectMapper.readValue(rawJson, VolumeAnalysisResult.class);
@@ -182,8 +185,9 @@ public class AnalysisService {
         log.info("Building outline: novelTitle={}, volumeCount={}", title, volumeResults.size());
         try {
             String volumesJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(volumeResults);
-            String rawJson = aiClient.chat(OutlinePrompt.systemPrompt(), OutlinePrompt.userMessage(title, volumesJson));
+            String rawJson = aiClient.chat(OutlinePrompt.systemPrompt(), OutlinePrompt.userMessage(title, volumesJson), OUTLINE_MAX_TOKENS);
             rawJson = AnalysisUtil.extractJson(rawJson);
+            log.info("buildOutline rawJson={}", rawJson);
             return objectMapper.readValue(rawJson, OutlineResult.class);
         } catch (Exception e) {
             log.error("Failed to build outline: novelTitle={}", title, e);
