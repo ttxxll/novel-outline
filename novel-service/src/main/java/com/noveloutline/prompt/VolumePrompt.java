@@ -12,8 +12,8 @@ public final class VolumePrompt {
             "  \"keyEvents\": [\"关键事件1\", \"关键事件2\", ...],\n" +
             "  \"charactersIntroduced\": [{name, role, relationshipToProtagonist, action}],\n" +
             "  \"factionsIntroduced\": [{name, type, stanceTowardProtagonist, members, description}],\n" +
-            "  \"itemsAcquired\": { weapons: [...], techniques: [...], elixirs: [...], spiritBeasts: [...] },\n" +
-            "  \"locationsVisited\": [{name, type, events}],\n" +
+            "  \"itemsAcquired\": { weapons: [{name, grade, significance}], techniques: [{name, grade, significance}], elixirs: [{name, grade, significance}], spiritBeasts: [{name, grade, significance}] },\n" +
+            "  \"locationsVisited\": [{name, description}],\n" +
             "  \"majorConflicts\": [{type, parties, cause, result}],\n" +
             "  \"foreshadowingPlanted\": [{description, hint}],\n" +
             "  \"foreshadowingResolved\": [{description, hint, resolution}]\n" +

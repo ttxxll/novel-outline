@@ -14,7 +14,7 @@ public final class OutlinePrompt {
             "  \"characterIndex\": { \"角色名\": [角色在各阶段的信息] },\n" +
             "  \"factionIndex\": { \"势力名\": [势力在各阶段的信息] },\n" +
             "  \"itemIndex\": { \"物品名\": [物品出现记录] },\n" +
-            "  \"locationTimeline\": [{name, type, events, appearedInVolume}],\n" +
+            "  \"locationTimeline\": [{name, description, appearedInVolume}],\n" +
             "  \"foreshadowingChain\": [{description, plantedVolume, resolvedVolume, resolution}],\n" +
             "  \"conflictMap\": { \"冲突描述\": [冲突在各阶段的变化] }\n" +
             "}\n\n" +

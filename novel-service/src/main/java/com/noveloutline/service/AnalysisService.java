@@ -77,6 +77,7 @@ public class AnalysisService {
                     return;
                 }
                 volumeResults.add(volResult);
+                // 更新上下文
                 AnalysisUtil.pruneAfterVolume(context, volResult.volumeSummary);
             }
             saveOutline(novelId, volumeResults);
@@ -89,6 +90,7 @@ public class AnalysisService {
     private VolumeAnalysisResult analyzeVolume(Volume volume, NovelContext context) {
         List<Chapter> chapters = chapterMapper.findByVolumeId(volume.getId());
         log.info("Volume '{}': {} chapters to analyze", volume.getTitle(), chapters.size());
+        boolean allPreviouslyCompleted = true;
         List<String> chapterJsons = new ArrayList<>();
         for (int ci = 0; ci < chapters.size(); ci++) {
             Chapter chapter = chapters.get(ci);
@@ -98,12 +100,21 @@ public class AnalysisService {
                 chapterJsons.add(chapter.getAnalysisResult());
                 continue;
             }
+            allPreviouslyCompleted = false;
             log.info("=== Chapter {}/{}: '{}' ({} words) ===", ci + 1, chapters.size(), chapter.getTitle(), chapter.getWordCount());
             String resultJson = analyzeChapter(chapter, context);
             if (resultJson == null) {
                 return null;
             }
             chapterJsons.add(resultJson);
+        }
+        if (allPreviouslyCompleted && volume.getSummary() != null && !volume.getSummary().isEmpty()) {
+            try {
+                log.info("Volume '{}' fully analyzed previously, restoring summary", volume.getTitle());
+                return objectMapper.readValue(volume.getSummary(), VolumeAnalysisResult.class);
+            } catch (Exception e) {
+                log.warn("Failed to restore volume summary, re-aggregating", e);
+            }
         }
         try {
             VolumeAnalysisResult volResult = aggregateVolume(volume.getTitle(), chapterJsons);
@@ -159,6 +170,7 @@ public class AnalysisService {
             String chaptersJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(chapterJsons);
             String rawJson = aiClient.chat(VolumePrompt.systemPrompt(), VolumePrompt.userMessage(title, chaptersJson));
             rawJson = AnalysisUtil.extractJson(rawJson);
+            log.info("aggregateVolume rawJson={}", rawJson);
             return objectMapper.readValue(rawJson, VolumeAnalysisResult.class);
         } catch (Exception e) {
             log.error("Failed to aggregate volume: title={}", title, e);

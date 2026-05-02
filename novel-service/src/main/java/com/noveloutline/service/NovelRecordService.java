@@ -140,7 +140,7 @@ public class NovelRecordService {
             r.setNovelId(novelId);
             r.setFirstChapterId(chapterId);
             r.setName(loc.name);
-            r.setType(loc.type);
+            r.setDescription(loc.description);
             locationRecordMapper.insertIgnore(r);
             count++;
         }

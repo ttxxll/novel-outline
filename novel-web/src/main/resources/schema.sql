@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS location
     novel_id BIGINT NOT NULL,
     first_chapter_id BIGINT,
     name VARCHAR(100) NOT NULL,
-    type VARCHAR(32),
+    description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_novel_name (novel_id, name)
 );

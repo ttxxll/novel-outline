@@ -10,6 +10,6 @@ public class Location {
     private Long novelId;
     private Long firstChapterId;
     private String name;
-    private String type;
+    private String description;
     private Date createdAt;
 }

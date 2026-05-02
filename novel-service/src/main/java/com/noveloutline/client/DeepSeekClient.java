@@ -7,18 +7,23 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.noveloutline.config.AiProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class DeepSeekClient implements AiClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final AiProperties properties;
     private final ObjectMapper objectMapper;
 
     public DeepSeekClient(AiProperties properties, ObjectMapper objectMapper) {
         this.properties = properties;
         this.objectMapper = objectMapper;
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(30_000);
+        factory.setReadTimeout(600_000);
+        this.restTemplate = new RestTemplate(factory);
     }
 
     @Override

@@ -8,4 +8,5 @@ public class CharacterEntry {
     public String role;
     public String relationshipToProtagonist;
     public String action;
+    public int lastSeenChapter;
 }
