@@ -35,7 +35,14 @@
       "Bash(echo \"Original: $\\(curl -s http://localhost:8088/api/chapters/by-novel/5)",
       "Bash(echo \"Light: $\\(curl -s http://localhost:8088/api/chapters/by-novel/5/light)",
       "Bash(taskkill //F //IM \"java.exe\")",
-      "Bash(mvn clean *)"
+      "Bash(mvn clean *)",
+      "Bash(echo \"Frontend page: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/\\)\")",
+      "Bash(echo \"Light chapters proxy: $\\(curl -s http://localhost:3000/api/chapters/by-novel/5/light)",
+      "PowerShell($vols = Invoke-RestMethod -Uri \"http://localhost:8088/api/volumes/by-novel/5\" -Method Get; $v = $vols | Where-Object { $_.summary -ne $null } | Select-Object -First 1; Write-Output \"Volume title: $\\($v.title\\)\"; Write-Output \"Summary length: $\\($v.summary.Length\\)\"; Write-Output \"---\"; $v.summary)",
+      "PowerShell($vols = Invoke-RestMethod -Uri \"http://localhost:8088/api/volumes/by-novel/5\"; $v = $vols | Where-Object { $_.summary -ne $null } | Select-Object -First 1; Write-Output \"--- Volume title: $\\($v.title\\) ---\"; Write-Output $v.summary)",
+      "PowerShell($outline = Invoke-RestMethod -Uri \"http://localhost:8088/api/novels/5/outline\"; $json = $outline | ConvertTo-Json -Depth 10; Write-Output \"Outline length: $\\($json.Length\\) chars\"; Write-Output $json.Substring\\(0, [Math]::Min\\(3000, $json.Length\\)\\))",
+      "Bash(tasklist)",
+      "Bash(findstr /i \"node\")"
     ]
   }
 }
