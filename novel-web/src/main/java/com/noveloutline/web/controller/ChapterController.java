@@ -26,4 +26,9 @@ public class ChapterController {
     public List<Chapter> byNovel(@PathVariable Long novelId) {
         return chapterService.getByNovelId(novelId);
     }
+
+    @GetMapping("/by-novel/{novelId}/light")
+    public List<Chapter> byNovelLight(@PathVariable Long novelId) {
+        return chapterService.getByNovelIdLight(novelId);
+    }
 }

@@ -15,6 +15,9 @@ public interface ChapterMapper {
     @Select("SELECT * FROM chapter WHERE novel_id = #{novelId} ORDER BY idx ASC")
     List<Chapter> findByNovelId(Long novelId);
 
+    @Select("SELECT id, volume_id, novel_id, idx, title, status, word_count FROM chapter WHERE novel_id = #{novelId} ORDER BY idx ASC")
+    List<Chapter> findByNovelIdLight(Long novelId);
+
     @Select("SELECT * FROM chapter WHERE volume_id = #{volumeId} ORDER BY idx ASC")
     List<Chapter> findByVolumeId(Long volumeId);
 

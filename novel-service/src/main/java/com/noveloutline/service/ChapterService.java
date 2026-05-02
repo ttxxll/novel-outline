@@ -28,4 +28,8 @@ public class ChapterService {
     public List<Chapter> getByVolumeId(Long volumeId) {
         return chapterMapper.findByVolumeId(volumeId);
     }
+
+    public List<Chapter> getByNovelIdLight(Long novelId) {
+        return chapterMapper.findByNovelIdLight(novelId);
+    }
 }

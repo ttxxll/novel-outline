@@ -25,7 +25,17 @@
       "Bash(curl -s http://localhost:3000/api/chapters/by-novel/2)",
       "Bash(curl -s http://localhost:3000/api/novels/2/progress)",
       "Bash(taskkill //F //IM \"node.exe\")",
-      "Bash(Remove-Item *)"
+      "Bash(Remove-Item *)",
+      "Bash(curl -s http://localhost:8088/api/chapters/by-novel/2)",
+      "Bash(curl *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({'title':d.get\\('title'\\),'status':d.get\\('status'\\),'analysisResult':d.get\\('analysisResult',''\\)[:2000]},ensure_ascii=False,indent=2\\)\\)\")",
+      "PowerShell($json = Invoke-RestMethod -Uri \"http://localhost:8088/api/chapters/2\" -Method Get; Write-Output \"Title: $\\($json.title\\)\"; Write-Output \"Status: $\\($json.status\\)\"; Write-Output \"analysisResult length: $\\($json.analysisResult.Length\\)\"; Write-Output \"---analysisResult---\"; $json.analysisResult)",
+      "PowerShell($c = Invoke-RestMethod -Uri \"http://localhost:8088/api/chapters/100\" -Method Get; $analysis = $c.analysisResult | ConvertFrom-Json; Write-Output \"Chapter: $\\($c.title\\)\"; Write-Output \"Status: $\\($c.status\\)\"; Write-Output \"Has summary: $\\($null -ne $analysis.summary\\)\"; Write-Output \"Characters: $\\($analysis.characters.Count\\)\"; Write-Output \"Factions: $\\($analysis.factions.Count\\)\"; Write-Output \"Locations: $\\($analysis.locations.Count\\)\"; Write-Output \"Conflicts: $\\($analysis.conflicts.Count\\)\"; Write-Output \"Foreshadowing: $\\($analysis.foreshadowing.Count\\)\")",
+      "PowerShell($c = Invoke-RestMethod -Uri \"http://localhost:8088/api/chapters/50\" -Method Get; $analysis = $c.analysisResult | ConvertFrom-Json; Write-Output \"Chapter: $\\($c.title\\)\"; Write-Output \"Status: $\\($c.status\\)\"; Write-Output \"Summary length: $\\($analysis.summary.Length\\)\"; Write-Output \"Characters: $\\($analysis.characters.Count\\)\"; Write-Output \"Factions: $\\($analysis.factions.Count\\)\"; Write-Output \"Locations: $\\($analysis.locations.Count\\)\"; Write-Output \"Conflicts: $\\($analysis.conflicts.Count\\)\"; Write-Output \"Foreshadowing: $\\($analysis.foreshadowing.Count\\)\")",
+      "Bash(echo \"Original: $\\(curl -s http://localhost:8088/api/chapters/by-novel/5)",
+      "Bash(echo \"Light: $\\(curl -s http://localhost:8088/api/chapters/by-novel/5/light)",
+      "Bash(taskkill //F //IM \"java.exe\")",
+      "Bash(mvn clean *)"
     ]
   }
 }
